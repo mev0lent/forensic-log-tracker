@@ -67,5 +67,89 @@ def case_info(case: str = typer.Option(..., "--case", "-c", help="Fall-ID")):
     content = desc_file.read_text()
     print(f"📝 Beschreibung von Fall {case}:\n\n{content}")
 
+@app.command()
+def report(
+    case: str = typer.Option(..., "--case", "-c", help="Case ID to summarize"),
+    verify: bool = typer.Option(True, help="Verify GPG signatures for each log")
+):
+    """
+    Generates a full report (Markdown) for a given case.
+    """
+    from pathlib import Path
+    import subprocess
+
+    case_dir = Path(f"logs/{case}")
+    if not case_dir.exists():
+        print(f"[!] Case '{case}' does not exist.")
+        raise typer.Exit()
+
+    description_file = case_dir / "description.txt"
+    if description_file.exists():
+        description = description_file.read_text().strip()
+    else:
+        description = "*No description found.*"
+
+    report_lines = []
+    report_lines.append(f"# 🕵️ Forensic Case Report: {case}\n")
+    report_lines.append(f"## 📝 Description\n{description}\n")
+
+    log_files = sorted(case_dir.glob("*.log"))
+    if not log_files:
+        print("[!] No log files found.")
+        raise typer.Exit()
+
+    report_lines.append("\n## 🧾 Executed Commands & Logs\n")
+
+    for log_file in log_files:
+        sig_file = log_file.with_suffix(log_file.suffix + ".sig")
+        timestamp = log_file.stem.split("_")[0].replace("-", ":")
+
+        # Try extracting the command, output excerpt, explanation and hash
+        log_text = log_file.read_text()
+        cmd = "N/A"
+        sha = "N/A"
+        explanation = ""
+        output_excerpt = ""
+        lines = log_text.splitlines()
+
+        try:
+            cmd = next(l for l in lines if l.startswith("### 🧩")).split("`")[1]
+            sha = next(l for l in lines if l.startswith("### 🔐")).split("`")[1]
+            explanation_idx = lines.index("### 🧾 Juristische Erklärung:") + 1
+            explanation = "\n".join(lines[explanation_idx:]).strip()
+            output_start = lines.index("### 📤 Output (Auszug):") + 2
+            output_end = lines.index("```", output_start)
+            output_excerpt = "\n".join(lines[output_start:output_end])
+        except Exception:
+            explanation = "*Could not parse log structure*"
+
+        # Optional GPG verification
+        sig_status = "⚠️ Missing"
+        if verify and sig_file.exists():
+            try:
+                subprocess.run(["gpg", "--verify", str(sig_file)], capture_output=True, check=True)
+                sig_status = "✅ Valid"
+            except subprocess.CalledProcessError:
+                sig_status = "❌ Invalid"
+        elif sig_file.exists():
+            sig_status = "✅ (Not Verified)"
+
+        report_lines.append(f"### ✅ Command: `{cmd}`")
+        report_lines.append(f"- Timestamp: `{timestamp}`")
+        report_lines.append(f"- Signature: {sig_status}")
+        report_lines.append(f"- SHA256: `{sha}`\n")
+        report_lines.append(f"#### Output (excerpt):\n```\n{output_excerpt}\n```\n")
+        report_lines.append(f"#### Legal Explanation:\n{explanation}\n---\n")
+
+    report_lines.append("\n## 🔐 GPG Summary")
+    report_lines.append("Each `.log` file is individually signed with GPG.")
+    report_lines.append("Signature status is shown above for traceability.\n")
+
+    # Write final report
+    report_path = case_dir / f"{case}_report.md"
+    report_path.write_text("\n".join(report_lines), encoding="utf-8")
+    print(f"✅ Report written to: {report_path}")
+
+
 if __name__ == "__main__":
     app()
