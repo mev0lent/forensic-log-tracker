@@ -4,10 +4,14 @@ from pathlib import Path
 import subprocess
 import re
 import yaml
+import hashlib
 
 def load_config():
     with open("config/config.yaml", "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+def sha256_from_string(data: str) -> str:
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 def analyze_case(case):
     case_dir = Path(f"logs/{case}")
@@ -30,25 +34,7 @@ def analyze_case(case):
     else:
         print("\n⚠️ Keine GPG-Signaturen gefunden.")
 
-def list_case_folders():
-    cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
-    if not cases:
-        print("Keine Fälle gefunden.")
-    else:
-        print("📁 Vorhandene Fälle:")
-        for c in cases:
-            print(f" - {c}")
-
-def show_case_description(case):
-    desc_file = Path(f"logs/{case}/description.txt")
-    if not desc_file.exists():
-        print("[!] Keine Fallbeschreibung gefunden.")
-        return
-
-    content = desc_file.read_text()
-    print(f"📝 Beschreibung von Fall {case}:\n\n{content}")
-
-def extract_block(lines, start_marker, end_marker="```"):
+def extract_block(lines, start_marker):
     try:
         start = next(i for i, l in enumerate(lines) if start_marker in l)
         start_code = next(i for i in range(start, len(lines)) if lines[i].strip() == "```") + 1
@@ -78,7 +64,6 @@ def generate_report(case, verify=True):
     description = "*No description found.*"
     if description_file.exists():
         desc_lines = description_file.read_text().splitlines()
-        # Only use line starting with "Beschreibung:"
         description = next((l for l in desc_lines if "Beschreibung:" in l), "").replace("Beschreibung:", "").strip()
 
     report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\n{description}\n"]
@@ -107,7 +92,6 @@ def generate_report(case, verify=True):
 
         output_lines = extract_block(lines, "### 📤 Output")
         output_excerpt = "\n".join(output_lines[:preview_lines])
-
         explanation = extract_explanation(lines)
 
         sig_status = "⚠️ Nicht signiert"
@@ -134,3 +118,42 @@ def generate_report(case, verify=True):
     report_path = case_dir / f"{case}_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
     print(f"✅ Report written to: {report_path}")
+
+def verify_output(case):
+    case_dir = Path(f"logs/{case}")
+    if not case_dir.exists():
+        print(f"[!] Case '{case}' does not exist.")
+        return
+
+    print(f"📦 Verifiziere Outputs für Fall: {case}")
+    for log_file in sorted(case_dir.glob("*.log")):
+        lines = log_file.read_text().splitlines()
+        expected_hash = None
+        for line in lines:
+            if "SHA256" in line and "`" in line:
+                match = re.findall(r"`(.*?)`", line)
+                if match:
+                    expected_hash = match[0]
+
+        output_lines = extract_block(lines, "### 📤 Output")
+        actual_hash = sha256_from_string("\n".join(output_lines))
+        result = "✅ OK" if actual_hash == expected_hash else "❌ Mismatch"
+        print(f"{log_file.name}: {result}")
+
+def list_case_folders():
+    cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
+    if not cases:
+        print("Keine Fälle gefunden.")
+    else:
+        print("📁 Vorhandene Fälle:")
+        for c in cases:
+            print(f" - {c}")
+
+def show_case_description(case: str):
+    desc_file = Path(f"logs/{case}/description.txt")
+    if not desc_file.exists():
+        print("[!] Keine Fallbeschreibung gefunden.")
+        return
+
+    content = desc_file.read_text()
+    print(f"📝 Beschreibung von Fall {case}:\n\n{content}")

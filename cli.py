@@ -24,11 +24,6 @@ def run(
     sign: bool = typer.Option(None, help="Erzeugte Logdatei GPG-signieren (Default laut config)")
 ):
     config = load_config()
-    case_dir = Path(f"logs/{case}")
-    if not case_dir.exists():
-        print(f"[!] Fall '{case}' existiert nicht. Bitte zuerst mit 'new-case' anlegen.")
-        raise typer.Exit(code=1)
-
     use_signing = sign if sign is not None else config.get("gpg", {}).get("enabled", True)
     log_path = execute_command(cmd, case)
     if use_signing:
@@ -54,6 +49,16 @@ def report(
     config = load_config()
     verify = verify if verify is not None else config.get("gpg", {}).get("auto_verify", True)
     generate_report(case, verify)
+
+@app.command()
+def verify_output(
+    case: str = typer.Option(..., "--case", "-c", help="Fall-ID für Output-Verifikation")
+):
+    """
+    Verifiziert den SHA256-Hash der Log-Outputs gegen den gespeicherten Hash.
+    """
+    from utils.reporting import verify_output
+    verify_output(case)
 
 if __name__ == "__main__":
     app()
