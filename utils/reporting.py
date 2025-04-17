@@ -3,6 +3,11 @@
 from pathlib import Path
 import subprocess
 import re
+import yaml
+
+def load_config():
+    with open("config/config.yaml", "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 def analyze_case(case):
     case_dir = Path(f"logs/{case}")
@@ -43,24 +48,40 @@ def show_case_description(case):
     content = desc_file.read_text()
     print(f"📝 Beschreibung von Fall {case}:\n\n{content}")
 
-def extract_between_markers(lines, start_marker, end_marker):
+def extract_block(lines, start_marker, end_marker="```"):
     try:
-        start = next(i for i, l in enumerate(lines) if start_marker in l) + 1
-        end = next(i for i in range(start, len(lines)) if end_marker in lines[i])
-        return "\n".join(lines[start:end]).strip()
+        start = next(i for i, l in enumerate(lines) if start_marker in l)
+        start_code = next(i for i in range(start, len(lines)) if lines[i].strip() == "```") + 1
+        end_code = next(i for i in range(start_code, len(lines)) if lines[i].strip() == "```")
+        return lines[start_code:end_code]
+    except StopIteration:
+        return ["*Nicht gefunden*"]
+
+def extract_explanation(lines):
+    try:
+        start = next(i for i, l in enumerate(lines) if "### 🧾" in l)
+        end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("###")), len(lines))
+        return "\n".join(lines[start + 1:end]).strip()
     except StopIteration:
         return "*Nicht gefunden*"
 
 def generate_report(case, verify=True):
+    config = load_config()
+    preview_lines = config.get("output", {}).get("preview_lines", 20)
+
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
         print(f"[!] Case '{case}' does not exist.")
         return
 
     description_file = case_dir / "description.txt"
-    description = description_file.read_text().strip() if description_file.exists() else "*No description found.*"
+    description = "*No description found.*"
+    if description_file.exists():
+        desc_lines = description_file.read_text().splitlines()
+        # Only use line starting with "Beschreibung:"
+        description = next((l for l in desc_lines if "Beschreibung:" in l), "").replace("Beschreibung:", "").strip()
 
-    report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\nFall-ID: {case}\nBeschreibung: {description}\n"]
+    report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\n{description}\n"]
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
         print("[!] No log files found.")
@@ -71,24 +92,23 @@ def generate_report(case, verify=True):
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
         timestamp = log_file.stem.split("_")[0].replace("-", ":")
+
         log_text = log_file.read_text()
         lines = log_text.splitlines()
 
-        # Initialize defaults
         cmd = "*Unbekannt*"
         sha = "*Nicht gefunden*"
-        explanation = "*Nicht gefunden*"
-        output_excerpt = "*Nicht gefunden*"
 
-        # Extract values flexibly
-        for line in lines:
-            if "Befehl" in line and "`" in line:
-                cmd = re.findall(r"`(.*?)`", line)[0] if re.findall(r"`(.*?)`", line) else cmd
+        for i, line in enumerate(lines):
+            if "Befehl" in line and i + 1 < len(lines) and "`" in lines[i + 1]:
+                cmd = re.findall(r"`(.*?)`", lines[i + 1])[0]
             elif "SHA256" in line and "`" in line:
-                sha = re.findall(r"`(.*?)`", line)[0] if re.findall(r"`(.*?)`", line) else sha
+                sha = re.findall(r"`(.*?)`", line)[0]
 
-        explanation = extract_between_markers(lines, "### 🧾", "###")
-        output_excerpt = extract_between_markers(lines, "### 📤", "```")
+        output_lines = extract_block(lines, "### 📤 Output")
+        output_excerpt = "\n".join(output_lines[:preview_lines])
+
+        explanation = extract_explanation(lines)
 
         sig_status = "⚠️ Nicht signiert"
         if verify and sig_file.exists():
