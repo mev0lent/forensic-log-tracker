@@ -29,8 +29,7 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
         except subprocess.CalledProcessError as e:
             output = f"[!] Command failed:\\n{e.stderr}"
 
-    output_hash = sha256_from_string(output) if config["output"].get("include_sha256", True) else ""
     explanation = get_legal_explanation(" ".join(cmd.split()[:4]))
     preview_lines = config["output"].get("preview_lines", config["default_output_lines"])
-    logfile = write_log(case_dir, cmd, output, explanation, output_hash, timestamp, preview_lines, dry_run)
+    logfile = write_log(case_dir, cmd, output, explanation, timestamp, preview_lines, dry_run)
     return logfile
