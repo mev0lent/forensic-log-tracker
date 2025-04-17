@@ -110,6 +110,25 @@ python cli.py run "strings /bin/ls" --case case001
 - Output is limited to configured preview lines
 - Log includes legal explanation and SHA256
 
+#### 🛡️ Simulate a command without executing it (dry-run)
+
+```bash
+python cli.py run "fdisk -l /dev/sdb" --case case001 --dry-run
+```
+The command is not actually executed.
+A log file is still created with:
+- Timestamp
+- Command name
+explanation (if available)
+
+- The output section will contain:
+
+```bash
+[!] DRY RUN: Der Command wurde nicht wirklich ausgeführt.
+```
+
+Useful for documenting intended actions without modifying data or evidence
+
 ### 🔍 Analyze logs for a case
 
 ```bash
