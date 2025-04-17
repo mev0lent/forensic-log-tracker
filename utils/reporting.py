@@ -37,14 +37,14 @@ def analyze_case(case):
         print("\n[x] Keine GPG-Signaturen gefunden.")
 
 # Extract output block from log content
-def extract_block(lines, start_marker):
+def extract_block(lines, start_contains):
     try:
-        start = next(i for i, l in enumerate(lines) if start_marker in l)
+        start = next(i for i, l in enumerate(lines) if start_contains in l)
         start_code = next(i for i in range(start, len(lines)) if lines[i].strip() == "```") + 1
         end_code = next(i for i in range(start_code, len(lines)) if lines[i].strip() == "```")
         return lines[start_code:end_code]
     except StopIteration:
-        return ["*Nicht gefunden*"]
+        return ["[!] Abschnitt nicht gefunden."]
 
 # Extract legal explanation section
 def extract_explanation(lines):
@@ -53,7 +53,7 @@ def extract_explanation(lines):
         end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("###")), len(lines))
         return "\n".join(lines[start + 1:end]).strip()
     except StopIteration:
-        return "*Nicht gefunden*"
+        return "[!] Erklärung nicht gefunden."
 
 # Build a complete Markdown report for a forensic case
 def generate_report(case, verify=True):
@@ -149,7 +149,10 @@ def verify_output(case):
                         expected_hash = match[0]
 
         output_lines = extract_block(lines, "### [+] Auszug des Outputs")
-        actual_hash = sha256_from_string("\n".join(output_lines))
+        cleaned = "\n".join([line.rstrip() for line in output_lines]).strip()
+        actual_hash = sha256_from_string(cleaned)
+        print(f"[DEBUG] Erwartet: {expected_hash}")
+        print(f"[DEBUG] Tatsächlich: {actual_hash}")
         result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
         print(f"{log_file.name}: {result}")
 
