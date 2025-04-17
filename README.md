@@ -100,7 +100,7 @@ This file maps commands (and their flags) to **German legal explanations**.
 python cli.py new-case case001 --description "Investigating suspicious USB stick"
 ```
 
-### ▶️ Run a forensic command
+### Run a forensic command
 
 ```bash
 python cli.py run "strings /bin/ls" --case case001
@@ -161,7 +161,7 @@ Includes:
 
 ---
 
-### 🧪 Verify output hashes
+### Verify output hashes
 
 ```bash
 python cli.py verify-output --case case001
@@ -187,13 +187,13 @@ gpg --verify logs/case001/logfile.log.sig
 ## Example Log File
 
 ```markdown
-# 🕒 2025-04-17T14:52:33Z
-## 🧪 Fall: case001
+# 2025-04-17T14:52:33Z
+## Fall: case001
 
-### 🧩 Befehl:
+### Befehl:
 `strings /bin/ls`
 
-### 📤 Output (Auszug):
+### Output (Auszug):
 <FIRST_FEW_OUTPUT_LINES>
 
 ### Erklärung:
