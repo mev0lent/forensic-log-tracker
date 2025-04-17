@@ -1,4 +1,3 @@
-# config/explanations.yaml
 strings: >
   Das Tool `strings` wurde verwendet, um druckbare Zeichenketten aus einem Dump zu extrahieren. Dies ist forensisch zulässig, da der Dump nicht verändert wird und wertvolle Hinweise wie Passwörter oder Konfigurationsdateien enthalten sein können.
 
@@ -7,3 +6,13 @@ dd: >
 
 ls: >
   `ls` listet Dateien in einem Verzeichnis auf. Dies dient der Übersicht, verändert aber keine Daten.
+
+mount:
+  default: >
+    Das Tool `mount` wird verwendet, um Dateisysteme einzuhängen. In einem forensischen Kontext ist besondere Vorsicht geboten, da durch das Einhängen ein Speichermedium möglicherweise verändert werden kann.
+
+  -o: >
+    Die Option `-o` erlaubt das Setzen von Mount-Parametern. Sie ist besonders relevant, um das Verhalten beim Einhängen gezielt zu steuern – z. B. Schreibschutz zu aktivieren.
+
+  ro: >
+    Die Unteroption `ro` steht für `read-only`. Sie sorgt dafür, dass das eingebundene Dateisystem nicht verändert werden kann. Dies ist in der digitalen Forensik **zwingend notwendig**, um Beweismittel nicht zu verändern.

@@ -14,5 +14,25 @@ def get_legal_explanation(tool: str) -> str:
     with template_file.open("r", encoding="utf-8") as f:
         template = Template(f.read())
 
-    explanation_text = explanations.get(tool, "Keine spezifische Erklärung vorhanden.")
+    # Erkennung von Tool und Flags
+    parts = tool.strip().split()
+    command = parts[0]
+    flags = parts[1:] if len(parts) > 1 else []
+
+    cmd_entry = explanations.get(command, None)
+    if not cmd_entry:
+        print(f"[Info] Keine Erklärung für '{command}' gefunden – bitte explanations.yaml ergänzen.")
+        explanation_text = "Keine spezifische Erklärung vorhanden."
+    else:
+        if isinstance(cmd_entry, str):
+            explanation_text = cmd_entry
+        else:
+            explanation_text = cmd_entry.get("default", "")
+            for flag in flags:
+                # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
+                explanation_text += "\n\n" + cmd_entry.get(flag, "")
+
+    if explanation_text.startswith("Keine spezifische Erklärung"):
+        print(f"[Info] Keine Erklärung für '{tool}' gefunden – bitte explanations.yaml ergänzen.")
+
     return template.render(tool=tool, explanation=explanation_text)

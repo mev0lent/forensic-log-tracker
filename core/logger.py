@@ -4,7 +4,7 @@
 from pathlib import Path
 
 def write_log(case_dir: Path, cmd: str, output: str, explanation: str, output_hash: str, timestamp: str, max_lines: int = 20) -> Path:
-    safe_time = timestamp.replace(":", "-")
+    safe_time = timestamp.replace(":", "-").replace(".", "-") # Zwei Logs pro Sekunde möglich
     logfile = case_dir / f"{safe_time}_command.log"
 
     with logfile.open("w", encoding="utf-8") as f:
