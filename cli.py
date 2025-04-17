@@ -21,11 +21,12 @@ def new_case(case: str, description: str = typer.Option("", help="Kurze Beschrei
 def run(
     cmd: str = typer.Argument(..., help="Der auszuführende Befehl"),
     case: str = typer.Option(..., "--case", "-c", help="Fall-ID (Name des Logs)"),
-    sign: bool = typer.Option(None, help="Erzeugte Logdatei GPG-signieren (Default laut config)")
+    sign: bool = typer.Option(None, help="Erzeugte Logdatei GPG-signieren (Default laut config)"),
+    dry_run: bool = typer.Option(False, help="Nur simulieren, Befehl nicht wirklich ausführen.")
 ):
     config = load_config()
     use_signing = sign if sign is not None else config.get("gpg", {}).get("enabled", True)
-    log_path = execute_command(cmd, case)
+    log_path = execute_command(cmd, case, dry_run=dry_run)
     if use_signing:
         sign_file(log_path)
 

@@ -109,6 +109,8 @@ def generate_report(case, verify=True):
         report_lines.append(f"- Signature: {sig_status}")
         report_lines.append(f"- SHA256: `{sha}`\n")
         report_lines.append(f"#### Output (excerpt):\n```\n{output_excerpt}\n```\n")
+        if "[DRY RUN]" in output_excerpt:
+            report_lines.append("*⚠️ This command was recorded in dry-run mode and was not executed.*\n")
         report_lines.append(f"#### Legal Explanation:\n{explanation}\n---\n")
 
     report_lines.append("\n## 🔐 GPG Summary")

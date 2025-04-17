@@ -1,21 +1,3 @@
-Perfect! Let's do the following:
-
-1. ✅ **Polish and expand your `README.md`**:
-   - Add a full usage tutorial
-   - Mention `config.yaml` and `explanations.yaml` details
-   - Introduce the new `report` command
-   - Explain how to avoid typing `python cli.py` every time
-
-2. ✨ Then we’ll make it ready for GitHub or delivery.
-
----
-
-## ✅ Finalized `README.md` (FULLY EXPANDED)
-
-Replace your current one with the following:
-
----
-
 # 🧾 Forensic Log Tracker
 
 > A modular, secure CLI tool for forensic professionals and students.  
@@ -32,39 +14,42 @@ Replace your current one with the following:
 - ✅ Digitally sign logs using **GPG** for integrity and authenticity
 - ✅ Structure evidence cleanly by **case**
 - ✅ Generate full **Markdown reports** per case
-
----
-
-## 🚀 Features
-
-| Feature                        | Description                                                  |
-|-------------------------------|--------------------------------------------------------------|
-| 🧪 Case Management            | Create and manage forensic cases individually                |
-| 🧾 Legal Explanations         | Auto-generated (German) legal summaries of used commands     |
-| 🔐 GPG Signature              | Every log is signed with your GPG key                        |
-| 📄 Clean Markdown Logs       | Logs are structured, printable, and readable                 |
-| 🧠 Configurable               | Templates, analyst name, line limits via `config.yaml`       |
-| 📄 Report Generation         | Full case summary generated as Markdown report               |
-| ✅ Modular Core              | Easy to extend with your own tools or export logic           |
+- ✅ Verify outputs with cryptographic hashes (SHA256)
 
 ---
 
 ## ⚙️ Setup
 
-### 1. Clone the repository
+### 🔧 Requirements
+
+- Linux (tested on Kali)
+- Python 3.9+
+- GPG (GNU Privacy Guard)
+
+---
+
+### 📥 Setup Steps
 
 ```bash
-git clone https://github.com/yourname/forensic-log-tracker.git
+# 1. Clone the repository
+git clone <REPOSITORY-URL>
 cd forensic-log-tracker
-```
 
-### 2. Install dependencies
+# 2. Set up a Python virtual environment
+sudo apt install python3-virtualenv
+virtualenv -p python3 log-tracker-env
+chmod +x log-tracker-env/bin/activate
+source log-tracker-env/bin/activate
 
-```bash
+# 3. Install Python dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Generate a GPG key (once)
+> 💡 Always run commands from the **base directory of the repo** (where `cli.py` lives).
+
+---
+
+### 🔐 Generate a GPG Key (once)
 
 ```bash
 gpg --full-generate-key
@@ -88,22 +73,26 @@ Customize the following values:
 analyst_name: "Your Name"
 default_output_lines: 20
 default_timezone: "UTC"
+
+gpg:
+  enabled: true
+  auto_verify: true
+
+output:
+  preview_lines: 20
+  include_sha256: true
+  report_format: "md"
 ```
 
 ### 🧾 `config/explanations.yaml`
 
 This file maps commands (and their flags) to **German legal explanations**.
 
-Currently optimized for tools like:
-
-- `strings`, `dd`, `ls`
-- `mount` with `-o ro` (for safe, read-only mounts)
-
-> All explanations are written in formal German to support forensic/legal documentation. You can expand this YAML with more tools or flags.
+> Explanations are written in formal legal German. You can expand this YAML to include more tools and options.
 
 ---
 
-## 🧑‍💻 Basic Usage
+## 🧑‍💻 Basic CLI Usage
 
 ### 📁 Create a case folder
 
@@ -117,9 +106,9 @@ python cli.py new-case case001 --description "Investigating suspicious USB stick
 python cli.py run "strings /bin/ls" --case case001
 ```
 
-This creates:
-- ✅ A signed `.log` file in `logs/case001/`
-- ✅ A detached GPG signature `.sig` for the log
+- Creates a `.log` and `.log.sig` file in `logs/case001/`
+- Output is limited to configured preview lines
+- Log includes legal explanation and SHA256
 
 ### 🔍 Analyze logs for a case
 
@@ -133,31 +122,45 @@ python cli.py analyze --case case001
 python cli.py case-info --case case001
 ```
 
+---
+
 ### 📄 Generate a full report
 
 ```bash
 python cli.py report --case case001
 ```
 
-This creates `logs/case001/case001_report.md`, including:
+Creates:  
+`logs/case001/case001_report.md`
+
+Includes:
 - All commands
-- Outputs
-- Legal explanations
+- Output excerpts
+- SHA256 hash of each output
+- Legal explanation
 - GPG signature status
+
+---
+
+### 🧪 Verify output hashes
+
+```bash
+python cli.py verify-output --case case001
+```
+
+This checks whether the SHA256 hash stored in each log matches the actual output hash.
 
 ---
 
 ## 🔐 About GPG Signing
 
 GPG ensures:
-- ✅ The log file hasn't been altered
-- ✅ The log author is cryptographically verifiable
-- ✅ Each `.log` has a matching `.log.sig` signature
-
-### 🔍 Verifying a signature
+- ✅ Logs are **authentic and unaltered**
+- ✅ Each `.log` file has a matching `.sig` signature
+- ✅ Signatures can be verified using:
 
 ```bash
-gpg --verify logs/case001/your_log_file.log.sig
+gpg --verify logs/case001/logfile.log.sig
 ```
 
 ---
@@ -166,21 +169,20 @@ gpg --verify logs/case001/your_log_file.log.sig
 
 ```markdown
 # 🕒 2025-04-17T14:52:33Z
-## 🧪 Case: case001
+## 🧪 Fall: case001
 
-### 🧩 Command:
+### 🧩 Befehl:
 `strings /bin/ls`
 
-### 📤 Output (Excerpt):
+### 📤 Output (Auszug):
 ```
+/bin/sh
 ELF
 GNU
-/bin/sh
 ```
 
-### 🧾 Legal Explanation:
-Das Tool `strings` wurde verwendet, um druckbare Zeichenketten ...
-(automatisch aus explanations.yaml generiert)
+### 🧾 Erklärung:
+Das Tool `strings` wurde verwendet ...
 
 ### 🔐 SHA256 Output Hash:
 `a6f7...d3`
@@ -190,30 +192,21 @@ Das Tool `strings` wurde verwendet, um druckbare Zeichenketten ...
 
 ## ⚡ Optional: Make It Shorter to Call
 
-Tired of typing `python cli.py` every time?
-
-You can make it executable directly:
-
 ```bash
 chmod +x cli.py
 ```
 
-Then run it as:
+Then run:
 
 ```bash
-./cli.py run "ls -la" --case mycase
+./cli.py run "ls -la" --case case001
 ```
 
-Or add an alias to your shell:
+Or use an alias:
 
 ```bash
 alias flt="python /full/path/to/cli.py"
-```
-
-Then use:
-
-```bash
-flt run "mount -o ro /dev/sdb1 /mnt" --case usbcase
+flt report --case case001
 ```
 
 ---
@@ -222,45 +215,64 @@ flt run "mount -o ro /dev/sdb1 /mnt" --case usbcase
 
 ```
 forensic-log-tracker/
-├── cli.py                  # Main CLI interface (Typer)
+├── cli.py
 ├── core/
-│   ├── executor.py         # Executes commands
-│   ├── case_manager.py     # Creates new cases
-│   ├── logger.py           # Builds logs
-│   ├── gpg_signer.py       # Handles GPG signature
-│   └── legalizer.py        # Legal explanation system (YAML + Jinja2)
+│   ├── executor.py
+│   ├── case_manager.py
+│   ├── logger.py
+│   ├── gpg_signer.py
+│   └── legalizer.py
+├── utils/
+│   └── reporting.py
 ├── config/
-│   ├── config.yaml         # Analyst preferences
-│   └── explanations.yaml   # Command-to-explanation mapping (DE)
+│   ├── config.yaml
+│   └── explanations.yaml
 ├── templates/
-│   └── legal.md.j2         # Jinja2 template
-├── logs/                   # Auto-generated case folders & logs
+│   └── legal.md.j2
+├── logs/  # auto-generated, excluded from git
 └── requirements.txt
 ```
+
+---
+
+## 🔒 .gitignore tip
+
+Make sure your `.gitignore` includes:
+
+```
+logs/
+*.sig
+*.log
+.env/
+__pycache__/
+log-tracker-env/
+```
+
+To protect private evidence logs and signatures.
 
 ---
 
 ## ✅ Ideal For
 
 - Cybersecurity students
-- Digital forensics education
-- Chain-of-custody documentation
-- Internal investigation tracking
-- Demonstration and training purposes
+- Digital forensics labs
+- Chain-of-custody validation
+- University exercises
+- Internal incident tracking
 
 ---
 
 ## 📄 License
 
-MIT – free to use, extend, and improve.  
-Pull requests welcome!
+MIT – free to use, extend, and improve.
 
 ---
 
 ## 📬 Contributing
 
-You can contribute by:
-- Expanding `explanations.yaml` with more tools
-- Adding export formats (HTML, PDF)
-- Creating GUI wrappers
-- Improving report styling and automation
+You can help by:
+- Adding more legal explanations
+- Improving export/report styles
+- Converting to HTML/PDF
+- Adding GUI or web layer
+
