@@ -172,3 +172,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# --- Custom for the forensic log tracker: exclude personal logs
+logs/

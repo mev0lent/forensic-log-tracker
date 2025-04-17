@@ -1,5 +1,3 @@
-# Führt Befehle aus und loggt alles
-
 # core/executor.py
 import subprocess
 from datetime import datetime
@@ -28,11 +26,11 @@ def execute_command(cmd: str, case: str):
     except subprocess.CalledProcessError as e:
         output = f"[ERROR] Command failed:\n{e.stderr}"
 
-    output_hash = sha256_from_string(output)
+    output_hash = sha256_from_string(output) if config["output"].get("include_sha256", True) else ""
 
-    # Gib ersten Teil des Befehls (Tool + Flags) weiter – z. B. "mount -o ro"
-    first_segment = " ".join(cmd.split()[:4])  # max 4 Tokens für Kontext
+    first_segment = " ".join(cmd.split()[:4])
     explanation = get_legal_explanation(first_segment)
 
-    logfile = write_log(case_dir, cmd, output, explanation, output_hash, timestamp, config["default_output_lines"])
-    return logfile  # wird in cli.py signiert
+    preview_lines = config["output"].get("preview_lines", config["default_output_lines"])
+    logfile = write_log(case_dir, cmd, output, explanation, output_hash, timestamp, preview_lines)
+    return logfile

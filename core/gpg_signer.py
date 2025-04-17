@@ -9,9 +9,9 @@ def sign_file(log_path: Path) -> bool:
             ["gpg", "--batch", "--yes", "--output", str(sig_path), "--detach-sign", str(log_path)],
             check=True
         )
-        print(f"🔐 Logdatei signiert: {sig_path.name}")
+        print(f"[+] Signed logfile: {sig_path.name}")
         return True
     except subprocess.CalledProcessError:
-        print("[!] GPG-Signatur fehlgeschlagen – ist ein Schlüssel verfügbar?")
+        print("[!] GPG signature failed – is a key configured?")
         return False
 

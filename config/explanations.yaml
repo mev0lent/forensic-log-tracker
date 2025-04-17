@@ -7,6 +7,41 @@ dd: >
 ls: >
   `ls` listet Dateien in einem Verzeichnis auf. Dies dient der Übersicht, verändert aber keine Daten.
 
+cd: >
+  `cd` wird verwendet, um in ein Verzeichnis zu wechseln. Dies verändert keine Daten und ist forensisch unkritisch.
+
+sha1sum: >
+  `sha1sum` berechnet einen kryptographischen Fingerabdruck (SHA-1) einer Datei. Dies dient der Integritätsprüfung und wird genutzt, um Dateien eindeutig zu identifizieren.
+
+md5sum: >
+  `md5sum` erzeugt eine MD5-Hash-Summe einer Datei. Auch wenn MD5 als kryptographisch unsicher gilt, ist es in der forensischen Praxis oft noch verbreitet für Integritätsprüfungen.
+
+unzip: >
+  `unzip` entpackt eine ZIP-Archivdatei. Der Inhalt wird extrahiert, was Daten auf dem Zielsystem verändert. Sollte nur auf einem **virtuellen Analysesystem** oder forensisch geklonten Medium erfolgen.
+
+mmls: >
+  `mmls` analysiert das Partition-Layout einer Datenträgerabbilddatei, ohne diese zu verändern. Es zeigt Partitionen, Offsets und Längen – ein typischer forensischer Schritt vor dem Mounten.
+
+mkdir:
+  default: >
+    `mkdir` erstellt ein Verzeichnis. Im forensischen Kontext wird es oft genutzt, um Zielordner für Mountpoints oder Exportdateien anzulegen.
+
+  -p: >
+    Die Option `-p` erstellt auch übergeordnete Verzeichnisse, falls sie nicht existieren. Sie verhindert zudem Fehler, wenn das Zielverzeichnis bereits vorhanden ist.
+
+losetup:
+  default: >
+    `losetup` erstellt ein Loop-Device, um ein Dateisystem-Image als Blockgerät bereitzustellen. Dies ist notwendig, um z. B. Partitionen aus einem Disk-Image gezielt anzusprechen.
+
+  -o: >
+    Die Option `-o` gibt den Offset in Bytes an, ab dem das Loop-Device beginnen soll – z. B. zum Mounten einer bestimmten Partition.
+
+  --find: >
+    Sucht automatisch das nächste freie Loop-Gerät (z. B. `/dev/loop0`).
+
+  --show: >
+    Gibt das erstellte Loop-Gerät direkt aus – nützlich zur automatisierten Weiterverarbeitung im Skript.
+
 mount:
   default: >
     Das Tool `mount` wird verwendet, um Dateisysteme einzuhängen. In einem forensischen Kontext ist besondere Vorsicht geboten, da durch das Einhängen ein Speichermedium möglicherweise verändert werden kann.
@@ -15,4 +50,10 @@ mount:
     Die Option `-o` erlaubt das Setzen von Mount-Parametern. Sie ist besonders relevant, um das Verhalten beim Einhängen gezielt zu steuern – z. B. Schreibschutz zu aktivieren.
 
   ro: >
-    Die Unteroption `ro` steht für `read-only`. Sie sorgt dafür, dass das eingebundene Dateisystem nicht verändert werden kann. Dies ist in der digitalen Forensik **zwingend notwendig**, um Beweismittel nicht zu verändern.
+    `ro` steht für `read-only`. Sie sorgt dafür, dass das eingebundene Dateisystem nicht verändert werden kann. Dies ist in der digitalen Forensik zwingend notwendig.
+
+  loop: >
+    `loop` erlaubt das Mounten von Dateien als Blockgeräte (z. B. Disk-Images). Wird oft mit `losetup` kombiniert oder ersetzt dieses direkt.
+
+  noatime: >
+    Die `noatime`-Option verhindert das Setzen von Zugriffszeitpunkten beim Lesen von Dateien. Dies minimiert die Änderungen am eingebundenen Dateisystem.

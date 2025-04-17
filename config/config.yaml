@@ -1,3 +1,14 @@
 analyst_name: "Max Mustermann"
 default_output_lines: 20
 default_timezone: "UTC"
+
+gpg:
+  enabled: true
+  auto_verify: true
+  default_key: ""        # optional: set GPG fingerprint if desired
+
+output:
+  language: "de"          # planned: "en", "de" — for future translation of explanations
+  report_format: "md"     # planned: "md", "html", "pdf"
+  preview_lines: 20       # how much of output to include in logs
+  include_sha256: true    # toggle for SHA256 in logs

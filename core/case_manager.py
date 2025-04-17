@@ -8,4 +8,4 @@ def create_case_folder(case: str, description: str):
 
     with desc_file.open("w", encoding="utf-8") as f:
         f.write(f"Fall-ID: {case}\nBeschreibung: {description}\n")
-    print(f"📁 Neuer Fall angelegt: {base_path}")
+    print(f" New case created: {base_path}")
