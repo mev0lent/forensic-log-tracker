@@ -1,4 +1,3 @@
-
 # utils/reporting.py
 from pathlib import Path
 import subprocess
@@ -6,13 +5,16 @@ import re
 import yaml
 import hashlib
 
+# Load global configuration from config.yaml
 def load_config():
     with open("config/config.yaml", "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
+# Generate SHA256 hash from a string (used to compare output integrity)
 def sha256_from_string(data: str) -> str:
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
+# Print available logs and GPG signatures for a case
 def analyze_case(case):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
@@ -34,6 +36,7 @@ def analyze_case(case):
     else:
         print("\n[x] Keine GPG-Signaturen gefunden.")
 
+# Extract output block from log content
 def extract_block(lines, start_marker):
     try:
         start = next(i for i, l in enumerate(lines) if start_marker in l)
@@ -43,36 +46,39 @@ def extract_block(lines, start_marker):
     except StopIteration:
         return ["*Nicht gefunden*"]
 
+# Extract legal explanation section
 def extract_explanation(lines):
     try:
-        start = next(i for i, l in enumerate(lines) if "### 🧾" in l)
+        start = next(i for i, l in enumerate(lines) if "### [+] Erklärung" in l)
         end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("###")), len(lines))
         return "\n".join(lines[start + 1:end]).strip()
     except StopIteration:
         return "*Nicht gefunden*"
 
+# Build a complete Markdown report for a forensic case
 def generate_report(case, verify=True):
     config = load_config()
     preview_lines = config.get("output", {}).get("preview_lines", 20)
 
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        print(f"[!] Case '{case}' does not exist.")
+        print(f"[!] Fall '{case}' existiert nicht.")
         return
 
     description_file = case_dir / "description.txt"
-    description = "*No description found.*"
+    description = "*Keine Beschreibung gefunden.*"
     if description_file.exists():
         desc_lines = description_file.read_text().splitlines()
         description = next((l for l in desc_lines if "Beschreibung:" in l), "").replace("Beschreibung:", "").strip()
 
-    report_lines = [f"# Forensic Case Report: {case}\n", f"## [---] Description\n{description}\n"]
+    report_lines = [f"# [+] Forensischer Bericht zu Fall: {case}\n", f"## [---] Beschreibung\n{description}\n"]
+
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
-        print("[!] No log files found.")
+        print("[!] Keine Logdateien gefunden.")
         return
 
-    report_lines.append("\n## [---] Executed Commands & Logs\n")
+    report_lines.append("\n## [---] Ausgeführte Befehle & Logs\n")
 
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
@@ -87,10 +93,11 @@ def generate_report(case, verify=True):
         for i, line in enumerate(lines):
             if "Befehl" in line and i + 1 < len(lines) and "`" in lines[i + 1]:
                 cmd = re.findall(r"`(.*?)`", lines[i + 1])[0]
-            elif "SHA256" in line and "`" in line:
-                sha = re.findall(r"`(.*?)`", line)[0]
+            elif "### [+] SHA256 Output Hash:" in line and i + 1 < len(lines):
+                if "`" in lines[i + 1]:
+                    sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
 
-        output_lines = extract_block(lines, "### 📤 Output")
+        output_lines = extract_block(lines, "### [+] Auszug des Outputs")
         output_excerpt = "\n".join(output_lines[:preview_lines])
         explanation = extract_explanation(lines)
 
@@ -104,44 +111,49 @@ def generate_report(case, verify=True):
         elif sig_file.exists():
             sig_status = "[+] (nicht geprüft)"
 
-        report_lines.append(f"### [+] Command: `{cmd}`")
-        report_lines.append(f"- Timestamp: `{timestamp}`")
-        report_lines.append(f"- Signature: {sig_status}")
+        report_lines.append(f"### [+] Befehl: `{cmd}`")
+        report_lines.append(f"- Zeitstempel: `{timestamp}`")
+        report_lines.append(f"- GPG-Signatur: {sig_status}")
         report_lines.append(f"- SHA256: `{sha}`\n")
-        report_lines.append(f"#### Output (excerpt):\n```\n{output_excerpt}\n```\n")
-        if "[DRY RUN]" in output_excerpt:
-            report_lines.append("*[!] This command was recorded in dry-run mode and was not executed.*\n")
-        report_lines.append(f"#### Legal Explanation:\n{explanation}\n---\n")
+        report_lines.append(f"#### Auszug des Outputs:\n```\n{output_excerpt}\n```\n")
 
-    report_lines.append("\n## [+] GPG Summary")
-    report_lines.append("Each `.log` file is individually signed with GPG.")
-    report_lines.append("Signature status is shown above for traceability.\n")
+        if "[DRY RUN]" in output_excerpt:
+            report_lines.append("[!] Dieser Befehl wurde im Dry-Run-Modus aufgezeichnet und NICHT ausgeführt.\n")
+
+        report_lines.append(f"#### Juristische Einordnung:\n{explanation}\n---\n")
+
+    report_lines.append("\n## [+] GPG-Überblick")
+    report_lines.append("Jede `.log`-Datei wurde mit GPG digital signiert.")
+    report_lines.append("Der Signaturstatus ist pro Befehl im Bericht dokumentiert.\n")
 
     report_path = case_dir / f"{case}_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
-    print(f"[+] Report written to: {report_path}")
+    print(f"[+] Bericht geschrieben nach: {report_path}")
 
+# Check SHA256 hashes of outputs for all logs in a case
 def verify_output(case):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        print(f"[!] Case '{case}' does not exist.")
+        print(f"[!] Fall '{case}' existiert nicht.")
         return
 
-    print(f"📦 Verifiziere Outputs für Fall: {case}")
+    print(f"[+] Verifiziere Output-Integrität für Fall: {case}")
     for log_file in sorted(case_dir.glob("*.log")):
         lines = log_file.read_text().splitlines()
         expected_hash = None
-        for line in lines:
-            if "SHA256" in line and "`" in line:
-                match = re.findall(r"`(.*?)`", line)
-                if match:
-                    expected_hash = match[0]
+        for i, line in enumerate(lines):
+            if "### [+] SHA256 Output Hash:" in line and i + 1 < len(lines):
+                if "`" in lines[i + 1]:
+                    match = re.findall(r"`(.*?)`", lines[i + 1])
+                    if match:
+                        expected_hash = match[0]
 
-        output_lines = extract_block(lines, "### Output")
+        output_lines = extract_block(lines, "### [+] Auszug des Outputs")
         actual_hash = sha256_from_string("\n".join(output_lines))
         result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
         print(f"{log_file.name}: {result}")
 
+# Print a list of all case folders
 def list_case_folders():
     cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
     if not cases:
@@ -151,6 +163,7 @@ def list_case_folders():
         for c in cases:
             print(f" - {c}")
 
+# Show case description file content
 def show_case_description(case: str):
     desc_file = Path(f"logs/{case}/description.txt")
     if not desc_file.exists():
