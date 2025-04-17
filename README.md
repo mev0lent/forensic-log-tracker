@@ -1,13 +1,13 @@
-# 🧾 Forensic Log Tracker
+# Forensic Log Tracker
 
 > A modular, secure CLI tool for forensic professionals and students.  
 > Designed to log, document, and digitally sign command outputs during digital forensic investigations.
 
 ---
 
-## 🔍 What is this?
+## What is this?
 
-**Forensic Log Tracker** is a Python-based command logging system for **Kali Linux** (or any Linux distro), enabling forensic analysts and students to:
+**Forensic Log Tracker** is a Python-based command logging system for **Kali Linux** (or any Linux distro), enabling forensic analysts to:
 
 - ✅ Execute shell commands and automatically log the results
 - ✅ Generate legal explanations per command (in **German**, for legal accuracy)
@@ -18,9 +18,9 @@
 
 ---
 
-## ⚙️ Setup
+## ️ Setup
 
-### 🔧 Requirements
+### Requirements
 
 - Linux (tested on Kali)
 - Python 3.9+
@@ -28,7 +28,7 @@
 
 ---
 
-### 📥 Setup Steps
+### Setup Steps
 
 ```bash
 # 1. Clone the repository
@@ -45,11 +45,11 @@ source log-tracker-env/bin/activate
 pip install -r requirements.txt
 ```
 
-> 💡 Always run commands from the **base directory of the repo** (where `cli.py` lives).
+> Always run commands from the **base directory of the repo** (where `cli.py` lives).
 
 ---
 
-### 🔐 Generate a GPG Key (once)
+### Generate a GPG Key (once)
 
 ```bash
 gpg --full-generate-key
@@ -63,9 +63,9 @@ Choose:
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
-### 🛠 `config/config.yaml`
+### `config/config.yaml`
 
 Customize the following values:
 
@@ -84,7 +84,7 @@ output:
   report_format: "md"
 ```
 
-### 🧾 `config/explanations.yaml`
+### `config/explanations.yaml`
 
 This file maps commands (and their flags) to **German legal explanations**.
 
@@ -92,9 +92,9 @@ This file maps commands (and their flags) to **German legal explanations**.
 
 ---
 
-## 🧑‍💻 Basic CLI Usage
+## Basic CLI Usage
 
-### 📁 Create a case folder
+### Create a case folder
 
 ```bash
 python cli.py new-case case001 --description "Investigating suspicious USB stick"
@@ -110,7 +110,7 @@ python cli.py run "strings /bin/ls" --case case001
 - Output is limited to configured preview lines
 - Log includes legal explanation and SHA256
 
-#### 🛡️ Simulate a command without executing it (dry-run)
+#### Simulate a command without executing it (dry-run)
 
 ```bash
 python cli.py run "fdisk -l /dev/sdb" --case case001 --dry-run
@@ -129,13 +129,13 @@ explanation (if available)
 
 Useful for documenting intended actions without modifying data or evidence
 
-### 🔍 Analyze logs for a case
+### Analyze logs for a case
 
 ```bash
 python cli.py analyze --case case001
 ```
 
-### 📋 View case info
+### View case info
 
 ```bash
 python cli.py case-info --case case001
@@ -143,7 +143,7 @@ python cli.py case-info --case case001
 
 ---
 
-### 📄 Generate a full report
+### Generate a full report
 
 ```bash
 python cli.py report --case case001
@@ -171,7 +171,7 @@ This checks whether the SHA256 hash stored in each log matches the actual output
 
 ---
 
-## 🔐 About GPG Signing
+## About GPG Signing
 
 GPG ensures:
 - ✅ Logs are **authentic and unaltered**
@@ -184,7 +184,7 @@ gpg --verify logs/case001/logfile.log.sig
 
 ---
 
-## 🧾 Example Log File
+## Example Log File
 
 ```markdown
 # 🕒 2025-04-17T14:52:33Z
@@ -194,22 +194,18 @@ gpg --verify logs/case001/logfile.log.sig
 `strings /bin/ls`
 
 ### 📤 Output (Auszug):
-```
-/bin/sh
-ELF
-GNU
-```
+<FIRST_FEW_OUTPUT_LINES>
 
-### 🧾 Erklärung:
+### Erklärung:
 Das Tool `strings` wurde verwendet ...
 
-### 🔐 SHA256 Output Hash:
+### SHA256 Output Hash:
 `a6f7...d3`
 ```
 
 ---
 
-## ⚡ Optional: Make It Shorter to Call
+## Optional: Make It Shorter to Call
 
 ```bash
 chmod +x cli.py
@@ -230,7 +226,7 @@ flt report --case case001
 
 ---
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```
 forensic-log-tracker/
@@ -254,7 +250,7 @@ forensic-log-tracker/
 
 ---
 
-## 🔒 .gitignore tip
+## .gitignore tip
 
 Make sure your `.gitignore` includes:
 
@@ -271,23 +267,13 @@ To protect private evidence logs and signatures.
 
 ---
 
-## ✅ Ideal For
-
-- Cybersecurity students
-- Digital forensics labs
-- Chain-of-custody validation
-- University exercises
-- Internal incident tracking
-
----
-
-## 📄 License
+## License
 
 MIT – free to use, extend, and improve.
 
 ---
 
-## 📬 Contributing
+## Contributing
 
 You can help by:
 - Adding more legal explanations
