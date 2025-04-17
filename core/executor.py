@@ -21,13 +21,13 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
     case_dir.mkdir(parents=True, exist_ok=True)
 
     if dry_run:
-        output = "[DRY RUN] Command not executed."
+        output = "[!] DRY RUN: Command not executed."
     else:
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
             output = result.stdout
         except subprocess.CalledProcessError as e:
-            output = f"[ERROR] Command failed:\\n{e.stderr}"
+            output = f"[!] Command failed:\\n{e.stderr}"
 
     output_hash = sha256_from_string(output) if config["output"].get("include_sha256", True) else ""
     explanation = get_legal_explanation(" ".join(cmd.split()[:4]))

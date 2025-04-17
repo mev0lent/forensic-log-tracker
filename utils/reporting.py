@@ -22,17 +22,17 @@ def analyze_case(case):
     log_files = list(case_dir.glob("*.log"))
     sig_files = list(case_dir.glob("*.log.sig"))
 
-    print(f"\n📂 Analyse von Fall: {case}")
-    print(f"🗂️ {len(log_files)} Logdatei(en) gefunden:")
+    print(f"\n[+] Analyse von Fall: {case}")
+    print(f"[+] {len(log_files)} Logdatei(en) gefunden:")
     for f in log_files:
         print(f" - {f.name}")
 
     if sig_files:
-        print(f"\n🔐 Signaturen vorhanden für:")
+        print(f"\n[+] Signaturen vorhanden für:")
         for f in sig_files:
             print(f" - {f.name}")
     else:
-        print("\n⚠️ Keine GPG-Signaturen gefunden.")
+        print("\n[x] Keine GPG-Signaturen gefunden.")
 
 def extract_block(lines, start_marker):
     try:
@@ -66,13 +66,13 @@ def generate_report(case, verify=True):
         desc_lines = description_file.read_text().splitlines()
         description = next((l for l in desc_lines if "Beschreibung:" in l), "").replace("Beschreibung:", "").strip()
 
-    report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\n{description}\n"]
+    report_lines = [f"# Forensic Case Report: {case}\n", f"## [---] Description\n{description}\n"]
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
         print("[!] No log files found.")
         return
 
-    report_lines.append("\n## 🧾 Executed Commands & Logs\n")
+    report_lines.append("\n## [---] Executed Commands & Logs\n")
 
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
@@ -94,32 +94,32 @@ def generate_report(case, verify=True):
         output_excerpt = "\n".join(output_lines[:preview_lines])
         explanation = extract_explanation(lines)
 
-        sig_status = "⚠️ Nicht signiert"
+        sig_status = "[!] Nicht signiert"
         if verify and sig_file.exists():
             try:
                 subprocess.run(["gpg", "--verify", str(sig_file)], capture_output=True, check=True)
-                sig_status = "✅ Gültig"
+                sig_status = "[+] Gültig"
             except subprocess.CalledProcessError:
-                sig_status = "❌ Ungültig"
+                sig_status = "[x] Ungültig"
         elif sig_file.exists():
-            sig_status = "✅ (nicht geprüft)"
+            sig_status = "[+] (nicht geprüft)"
 
-        report_lines.append(f"### ✅ Command: `{cmd}`")
+        report_lines.append(f"### [+] Command: `{cmd}`")
         report_lines.append(f"- Timestamp: `{timestamp}`")
         report_lines.append(f"- Signature: {sig_status}")
         report_lines.append(f"- SHA256: `{sha}`\n")
         report_lines.append(f"#### Output (excerpt):\n```\n{output_excerpt}\n```\n")
         if "[DRY RUN]" in output_excerpt:
-            report_lines.append("*⚠️ This command was recorded in dry-run mode and was not executed.*\n")
+            report_lines.append("*[!] This command was recorded in dry-run mode and was not executed.*\n")
         report_lines.append(f"#### Legal Explanation:\n{explanation}\n---\n")
 
-    report_lines.append("\n## 🔐 GPG Summary")
+    report_lines.append("\n## [+] GPG Summary")
     report_lines.append("Each `.log` file is individually signed with GPG.")
     report_lines.append("Signature status is shown above for traceability.\n")
 
     report_path = case_dir / f"{case}_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
-    print(f"✅ Report written to: {report_path}")
+    print(f"[+] Report written to: {report_path}")
 
 def verify_output(case):
     case_dir = Path(f"logs/{case}")
@@ -137,17 +137,17 @@ def verify_output(case):
                 if match:
                     expected_hash = match[0]
 
-        output_lines = extract_block(lines, "### 📤 Output")
+        output_lines = extract_block(lines, "### Output")
         actual_hash = sha256_from_string("\n".join(output_lines))
-        result = "✅ OK" if actual_hash == expected_hash else "❌ Mismatch"
+        result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
         print(f"{log_file.name}: {result}")
 
 def list_case_folders():
     cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
     if not cases:
-        print("Keine Fälle gefunden.")
+        print("[!] Keine Fälle gefunden.")
     else:
-        print("📁 Vorhandene Fälle:")
+        print("[+] Vorhandene Fälle:")
         for c in cases:
             print(f" - {c}")
 
@@ -158,4 +158,4 @@ def show_case_description(case: str):
         return
 
     content = desc_file.read_text()
-    print(f"📝 Beschreibung von Fall {case}:\n\n{content}")
+    print(f"[+] Beschreibung von Fall {case}:\n\n{content}")
