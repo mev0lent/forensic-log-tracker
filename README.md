@@ -1,16 +1,37 @@
-# Forensic Log Tracker
+Perfect! Let's do the following:
 
-> A modular, secure CLI tool for forensic professionals and students. Designed to log, document, and digitally sign command outputs during digital forensic investigations.
+1. ✅ **Polish and expand your `README.md`**:
+   - Add a full usage tutorial
+   - Mention `config.yaml` and `explanations.yaml` details
+   - Introduce the new `report` command
+   - Explain how to avoid typing `python cli.py` every time
+
+2. ✨ Then we’ll make it ready for GitHub or delivery.
+
+---
+
+## ✅ Finalized `README.md` (FULLY EXPANDED)
+
+Replace your current one with the following:
+
+---
+
+# 🧾 Forensic Log Tracker
+
+> A modular, secure CLI tool for forensic professionals and students.  
+> Designed to log, document, and digitally sign command outputs during digital forensic investigations.
 
 ---
 
 ## 🔍 What is this?
 
-**Forensic Log Tracker** is a logging tool built for **Kali Linux** (or any Linux distro), allowing forensic analysts to:
-- ✅ Execute system commands and log the output
-- ✅ Automatically generate legal explanations for those commands
-- ✅ Digitally sign each log with **GPG**
-- ✅ Organize cases and maintain chain-of-custody integrity
+**Forensic Log Tracker** is a Python-based command logging system for **Kali Linux** (or any Linux distro), enabling forensic analysts and students to:
+
+- ✅ Execute shell commands and automatically log the results
+- ✅ Generate legal explanations per command (in **German**, for legal accuracy)
+- ✅ Digitally sign logs using **GPG** for integrity and authenticity
+- ✅ Structure evidence cleanly by **case**
+- ✅ Generate full **Markdown reports** per case
 
 ---
 
@@ -19,11 +40,12 @@
 | Feature                        | Description                                                  |
 |-------------------------------|--------------------------------------------------------------|
 | 🧪 Case Management            | Create and manage forensic cases individually                |
-| 🧾 Legal Explanations         | Auto-generated explanations based on the command used        |
-| 🔐 GPG Signature              | Every log is optionally signed with a GPG key                |
-| 📄 Clean Markdown Logs       | Human-readable, printable reports for court or review        |
-| 🧠 Configurable               | Default line limits, analyst name, templates via `config.yaml` |
-| ✅ Modular Core              | Easy to extend with your own tools, formats or export logic |
+| 🧾 Legal Explanations         | Auto-generated (German) legal summaries of used commands     |
+| 🔐 GPG Signature              | Every log is signed with your GPG key                        |
+| 📄 Clean Markdown Logs       | Logs are structured, printable, and readable                 |
+| 🧠 Configurable               | Templates, analyst name, line limits via `config.yaml`       |
+| 📄 Report Generation         | Full case summary generated as Markdown report               |
+| ✅ Modular Core              | Easy to extend with your own tools or export logic           |
 
 ---
 
@@ -42,53 +64,105 @@ cd forensic-log-tracker
 pip install -r requirements.txt
 ```
 
-### 3. (Optional) Generate a GPG key
+### 3. Generate a GPG key (once)
 
 ```bash
 gpg --full-generate-key
 ```
 
+Choose:
+- Key type: RSA and RSA
+- Key size: 4096 bits
+- Expiry: 0 (no expiration)
+- Name/email: can be fake (used offline)
+
 ---
 
-## 🧑‍💻 Usage
+## 🔧 Configuration
 
-### 📁 Create a new case
+### 🛠 `config/config.yaml`
+
+Customize the following values:
+
+```yaml
+analyst_name: "Your Name"
+default_output_lines: 20
+default_timezone: "UTC"
+```
+
+### 🧾 `config/explanations.yaml`
+
+This file maps commands (and their flags) to **German legal explanations**.
+
+Currently optimized for tools like:
+
+- `strings`, `dd`, `ls`
+- `mount` with `-o ro` (for safe, read-only mounts)
+
+> All explanations are written in formal German to support forensic/legal documentation. You can expand this YAML with more tools or flags.
+
+---
+
+## 🧑‍💻 Basic Usage
+
+### 📁 Create a case folder
 
 ```bash
 python cli.py new-case case001 --description "Investigating suspicious USB stick"
 ```
 
-### ▶️ Run a command inside a case
+### ▶️ Run a forensic command
 
 ```bash
 python cli.py run "strings /bin/ls" --case case001
 ```
 
 This creates:
-- A signed `.log` file in `logs/case001/`
-- A `.sig` file with the detached GPG signature
+- ✅ A signed `.log` file in `logs/case001/`
+- ✅ A detached GPG signature `.sig` for the log
 
-### 🔍 Analyze the case folder
+### 🔍 Analyze logs for a case
 
 ```bash
 python cli.py analyze --case case001
 ```
 
-### 📂 List all existing cases
-
-```bash
-python cli.py list-cases
-```
-
-### 📋 Show case description
+### 📋 View case info
 
 ```bash
 python cli.py case-info --case case001
 ```
 
+### 📄 Generate a full report
+
+```bash
+python cli.py report --case case001
+```
+
+This creates `logs/case001/case001_report.md`, including:
+- All commands
+- Outputs
+- Legal explanations
+- GPG signature status
+
 ---
 
-## 🧾 Example Log Output
+## 🔐 About GPG Signing
+
+GPG ensures:
+- ✅ The log file hasn't been altered
+- ✅ The log author is cryptographically verifiable
+- ✅ Each `.log` has a matching `.log.sig` signature
+
+### 🔍 Verifying a signature
+
+```bash
+gpg --verify logs/case001/your_log_file.log.sig
+```
+
+---
+
+## 🧾 Example Log File
 
 ```markdown
 # 🕒 2025-04-17T14:52:33Z
@@ -105,7 +179,8 @@ GNU
 ```
 
 ### 🧾 Legal Explanation:
-The `strings` tool was used to extract printable characters from a binary. This helps identify human-readable data such as paths, passwords, or configs without altering evidence.
+Das Tool `strings` wurde verwendet, um druckbare Zeichenketten ...
+(automatisch aus explanations.yaml generiert)
 
 ### 🔐 SHA256 Output Hash:
 `a6f7...d3`
@@ -113,95 +188,53 @@ The `strings` tool was used to extract printable characters from a binary. This 
 
 ---
 
-## 🔐 About GPG Signing
+## ⚡ Optional: Make It Shorter to Call
 
-All logs generated by this tool are optionally signed using [GnuPG (GPG)](https://gnupg.org/). This ensures:
+Tired of typing `python cli.py` every time?
 
-- ✅ The log file has **not been modified** since creation
-- ✅ The log was created by someone with access to the **private key**
-- ✅ The digital signature can be **independently verified** by others
-
-### 🔐 Why GPG instead of just SHA256?
-
-| Method     | What it proves                            | Forensically valid? |
-|------------|-------------------------------------------|----------------------|
-| SHA256     | File integrity (unchanged content)        | ⚠️ Can be spoofed    |
-| GPG (used) | Integrity **and** authorship (via key)     | ✅ Recommended        |
-
-> Logs are signed using **detached signatures** stored as `.log.sig` files.
-
-### 🧰 How to generate a GPG key (if you don’t have one):
+You can make it executable directly:
 
 ```bash
-gpg --full-generate-key
+chmod +x cli.py
 ```
 
-Choose:
-- Key type: `RSA and RSA`
-- Key size: `4096 bits`
-- Expiry: `0` (no expiration)
-- Name/email (can be fake if used offline)
-
-Once generated, you can view your key with:
+Then run it as:
 
 ```bash
-gpg --list-keys
+./cli.py run "ls -la" --case mycase
+```
+
+Or add an alias to your shell:
+
+```bash
+alias flt="python /full/path/to/cli.py"
+```
+
+Then use:
+
+```bash
+flt run "mount -o ro /dev/sdb1 /mnt" --case usbcase
 ```
 
 ---
 
-## 🔐 Verifying Signatures
-
-To verify that a `.log` file was signed by a trusted GPG key and hasn't been altered:
-
-```bash
-gpg --verify logs/case001/2025-04-17T14-52-33_command.log.sig
-```
-
-✅ If the file is unchanged and signed correctly, you'll see something like:
-
-```
-gpg: Signature made ...
-gpg: Good signature from "Your Name <email@example.com>"
-```
-
-❌ If the log was changed or the signature is missing/invalid:
-
-```
-gpg: BAD signature
-```
-
-> You can also export your public key and share it with reviewers or store it alongside your case folder.
-
----
-
-## 🛠 Configuration (`config/config.yaml`)
-
-```yaml
-analyst_name: "Max Mustermann"
-default_output_lines: 20
-default_timezone: "UTC"
-```
-
----
-
-## 📁 Project Structure
+## 📁 Folder Structure
 
 ```
 forensic-log-tracker/
-├── cli.py                  # CLI interface
+├── cli.py                  # Main CLI interface (Typer)
 ├── core/
-│   ├── executor.py         # Executes and logs commands
-│   ├── case_manager.py     # Creates case folders
-│   ├── logger.py           # Writes logs to Markdown
-│   ├── gpg_signer.py       # Signs logs with GPG
-│   ├── legalizer.py        # Renders legal explanations
+│   ├── executor.py         # Executes commands
+│   ├── case_manager.py     # Creates new cases
+│   ├── logger.py           # Builds logs
+│   ├── gpg_signer.py       # Handles GPG signature
+│   └── legalizer.py        # Legal explanation system (YAML + Jinja2)
 ├── config/
-│   ├── config.yaml         # General settings
-│   └── explanations.yaml   # Tool-to-explanation mapping
+│   ├── config.yaml         # Analyst preferences
+│   └── explanations.yaml   # Command-to-explanation mapping (DE)
 ├── templates/
-│   └── legal.md.j2         # Jinja2 template for explanation section
-├── logs/                   # Auto-created logs per case
+│   └── legal.md.j2         # Jinja2 template
+├── logs/                   # Auto-generated case folders & logs
 └── requirements.txt
 ```
 
@@ -210,26 +243,24 @@ forensic-log-tracker/
 ## ✅ Ideal For
 
 - Cybersecurity students
-- Digital forensics courses
-- CTF players who want traceability
-- Forensic experts writing chain-of-custody documentation
-- Academic use cases
+- Digital forensics education
+- Chain-of-custody documentation
+- Internal investigation tracking
+- Demonstration and training purposes
 
 ---
 
 ## 📄 License
 
 MIT – free to use, extend, and improve.  
-Pull requests are welcome!
+Pull requests welcome!
 
 ---
 
-## 📬 Contributions
+## 📬 Contributing
 
-Feel free to fork the repo, open issues, or create pull requests.  
-You can contribute:
-- New explanation templates
-- Export functionality (e.g., PDF)
-- Log search & filtering
-- Timeline views
-
+You can contribute by:
+- Expanding `explanations.yaml` with more tools
+- Adding export formats (HTML, PDF)
+- Creating GUI wrappers
+- Improving report styling and automation
