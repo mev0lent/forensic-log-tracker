@@ -1,0 +1,9 @@
+# config/explanations.yaml
+strings: >
+  Das Tool `strings` wurde verwendet, um druckbare Zeichenketten aus einem Dump zu extrahieren. Dies ist forensisch zulässig, da der Dump nicht verändert wird und wertvolle Hinweise wie Passwörter oder Konfigurationsdateien enthalten sein können.
+
+dd: >
+  `dd` wurde verwendet, um eine 1:1-Kopie eines Datenträgers zu erstellen. Es wird im Read-Only-Modus verwendet und verändert keine Daten. Eine rechtlich zulässige Methode zur Sicherung digitaler Beweise.
+
+ls: >
+  `ls` listet Dateien in einem Verzeichnis auf. Dies dient der Übersicht, verändert aber keine Daten.

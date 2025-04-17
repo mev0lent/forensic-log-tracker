@@ -1,0 +1,4 @@
+analyst_name: "Max Mustermann"
+default_output_lines: 20
+default_timezone: "UTC"
+manifest_name: "SHA256-MANIFEST.txt"
