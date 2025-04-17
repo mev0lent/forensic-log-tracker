@@ -1,6 +1,8 @@
+
 # utils/reporting.py
 from pathlib import Path
 import subprocess
+import re
 
 def analyze_case(case):
     case_dir = Path(f"logs/{case}")
@@ -41,6 +43,14 @@ def show_case_description(case):
     content = desc_file.read_text()
     print(f"📝 Beschreibung von Fall {case}:\n\n{content}")
 
+def extract_between_markers(lines, start_marker, end_marker):
+    try:
+        start = next(i for i, l in enumerate(lines) if start_marker in l) + 1
+        end = next(i for i in range(start, len(lines)) if end_marker in lines[i])
+        return "\n".join(lines[start:end]).strip()
+    except StopIteration:
+        return "*Nicht gefunden*"
+
 def generate_report(case, verify=True):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
@@ -50,7 +60,7 @@ def generate_report(case, verify=True):
     description_file = case_dir / "description.txt"
     description = description_file.read_text().strip() if description_file.exists() else "*No description found.*"
 
-    report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\n{description}\n"]
+    report_lines = [f"# 🕵️ Forensic Case Report: {case}\n", f"## 📝 Description\nFall-ID: {case}\nBeschreibung: {description}\n"]
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
         print("[!] No log files found.")
@@ -61,34 +71,34 @@ def generate_report(case, verify=True):
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
         timestamp = log_file.stem.split("_")[0].replace("-", ":")
-
         log_text = log_file.read_text()
-        cmd = "N/A"
-        sha = "N/A"
-        explanation = "*Missing*"
-        output_excerpt = "*No output found*"
         lines = log_text.splitlines()
 
-        try:
-            cmd = next(l for l in lines if l.startswith("### 🧩 Befehl:")).split("`")[1]
-            sha = next(l for l in lines if l.startswith("### 🔐 SHA256")).split("`")[1]
-            explanation_idx = lines.index("### 🧾 Juristische Erklärung:") + 1
-            explanation = "\n".join(lines[explanation_idx:]).strip()
-            output_start = lines.index("### 📤 Output (Auszug):") + 2
-            output_end = lines.index("```", output_start)
-            output_excerpt = "\n".join(lines[output_start:output_end])
-        except Exception:
-            explanation = "*Could not parse log structure*"
+        # Initialize defaults
+        cmd = "*Unbekannt*"
+        sha = "*Nicht gefunden*"
+        explanation = "*Nicht gefunden*"
+        output_excerpt = "*Nicht gefunden*"
 
-        sig_status = "⚠️ Missing"
+        # Extract values flexibly
+        for line in lines:
+            if "Befehl" in line and "`" in line:
+                cmd = re.findall(r"`(.*?)`", line)[0] if re.findall(r"`(.*?)`", line) else cmd
+            elif "SHA256" in line and "`" in line:
+                sha = re.findall(r"`(.*?)`", line)[0] if re.findall(r"`(.*?)`", line) else sha
+
+        explanation = extract_between_markers(lines, "### 🧾", "###")
+        output_excerpt = extract_between_markers(lines, "### 📤", "```")
+
+        sig_status = "⚠️ Nicht signiert"
         if verify and sig_file.exists():
             try:
                 subprocess.run(["gpg", "--verify", str(sig_file)], capture_output=True, check=True)
-                sig_status = "✅ Valid"
+                sig_status = "✅ Gültig"
             except subprocess.CalledProcessError:
-                sig_status = "❌ Invalid"
+                sig_status = "❌ Ungültig"
         elif sig_file.exists():
-            sig_status = "✅ (Not Verified)"
+            sig_status = "✅ (nicht geprüft)"
 
         report_lines.append(f"### ✅ Command: `{cmd}`")
         report_lines.append(f"- Timestamp: `{timestamp}`")
