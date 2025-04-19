@@ -1,5 +1,6 @@
 # core/logger.py
 from pathlib import Path
+from utils.log import logger
 
 def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp: str, max_lines: int = 20, dry_run: bool = False, output_hash: str = "") -> Path:
     safe_time = timestamp.replace(":", "-").replace(".", "-")
