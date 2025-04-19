@@ -5,11 +5,9 @@ import re
 import yaml
 from core.hasher import compute_hash
 from utils.log import logger
+from utils.shared_config import load_config
 
-# Load global configuration from config.yaml
-def load_config():
-    with open("config/config.yaml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+config = load_config()
 
 # Print available logs and GPG signatures for a case
 def analyze_case(case):
@@ -56,7 +54,6 @@ def extract_explanation(lines):
 # Build a complete Markdown report for a forensic case
 def generate_report(case, verify=True):
     logger.info(f"Generating report for case: {case}")
-    config = load_config()
     preview_lines = config.get("output", {}).get("preview_lines", 20)
 
     case_dir = Path(f"logs/{case}")

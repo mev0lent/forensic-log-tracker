@@ -7,14 +7,12 @@ from core.hasher import compute_hash
 from core.logger import write_log
 from core.legalizer import get_legal_explanation
 from utils.log import logger
+from utils.shared_config import load_config
 
+config = load_config()
 
-def load_config():
-    with open("config/config.yaml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 def execute_command(cmd: str, case: str, dry_run: bool = False):
-    config = load_config()
     timestamp = datetime.now(timezone.utc).isoformat()
     case_dir = Path(f"logs/{case}")
     case_dir.mkdir(parents=True, exist_ok=True)
