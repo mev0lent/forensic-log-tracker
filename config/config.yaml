@@ -12,3 +12,7 @@ output:
   report_format: "md"     # planned: "md", "html", "pdf"
   preview_lines: 20       # how much of output to include in logs
   include_sha256: true    # toggle for SHA256 in logs
+  hash_algorithm: "sha256"
+
+logging:
+  level: INFO  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL

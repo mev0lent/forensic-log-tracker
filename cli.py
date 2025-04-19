@@ -1,5 +1,6 @@
 # cli.py
 import typer
+from utils.log import logger
 import yaml
 from core.executor import execute_command
 from core.case_manager import create_case_folder
@@ -21,7 +22,10 @@ def load_config():
 
 @app.command()
 def new_case(case: str, description: str = typer.Option("", help="Kurze Beschreibung des Falls")):
-    create_case_folder(case, description)
+    try:
+        create_case_folder(case, description)
+    except Exception as e:
+        logger.error(f"Something went wrong: {e}")
 
 @app.command()
 def run(
@@ -33,9 +37,20 @@ def run(
     ensure_case_exists(case)
     config = load_config()
     use_signing = sign if sign is not None else config.get("gpg", {}).get("enabled", True)
-    log_path = execute_command(cmd, case, dry_run=dry_run)
+
+    try:
+        log_path = execute_command(cmd, case, dry_run=dry_run)
+        logger.info(f"Command executed and logged: {cmd}")
+    except Exception as e:
+        logger.error(f"[run] Command failed: {e}")
+        raise typer.Exit(code=2)
+
     if use_signing:
-        sign_file(log_path)
+        try:
+            sign_file(log_path)
+            logger.info(f"Log file signed: {log_path}")
+        except Exception as e:
+            logger.error(f"[run] Signing failed: {e}")
 
 @app.command()
 def analyze(case: str = typer.Option(..., "--case", "-c", help="Fall-ID")):

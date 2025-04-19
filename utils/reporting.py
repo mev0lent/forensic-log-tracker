@@ -3,22 +3,19 @@ from pathlib import Path
 import subprocess
 import re
 import yaml
-import hashlib
+from core.hasher import compute_hash
+from utils.log import logger
 
 # Load global configuration from config.yaml
 def load_config():
     with open("config/config.yaml", "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
-# Generate SHA256 hash from a string (used to compare output integrity)
-def sha256_from_string(data: str) -> str:
-    return hashlib.sha256(data.encode("utf-8")).hexdigest()
-
 # Print available logs and GPG signatures for a case
 def analyze_case(case):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        print(f"[!] Case {case} doesn't.")
+        logger.error(f"[x] Case {case} does not exist")
         return
 
     log_files = list(case_dir.glob("*.log"))
@@ -34,7 +31,7 @@ def analyze_case(case):
         for f in sig_files:
             print(f" - {f.name}")
     else:
-        print("\n[x] No GPG-signature found.")
+        logger.error(f"[x] No signatures found.")
 
 # Extract output block from log content
 def extract_block(lines, start_contains):
@@ -44,6 +41,7 @@ def extract_block(lines, start_contains):
         end_code = next(i for i in range(start_code, len(lines)) if lines[i].strip() == "```")
         return lines[start_code:end_code]
     except StopIteration:
+        logger.error(f"[x] Section not found found.")
         return ["[!] Section not found."]
 
 # Extract legal explanation section
@@ -57,12 +55,13 @@ def extract_explanation(lines):
 
 # Build a complete Markdown report for a forensic case
 def generate_report(case, verify=True):
+    logger.info(f"Generating report for case: {case}")
     config = load_config()
     preview_lines = config.get("output", {}).get("preview_lines", 20)
 
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        print(f"[!] Case '{case}' doesn't exist.")
+        logger.error(f"[x] Case {case} does not exist")
         return
 
     description_file = case_dir / "description.txt"
@@ -75,7 +74,7 @@ def generate_report(case, verify=True):
 
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
-        print("[!] No logfile(s) found.")
+        logger.warning(f"No log files found in {case_dir}")
         return
 
     report_lines.append("\n## [---] Executed commands & logs\n")
@@ -128,13 +127,13 @@ def generate_report(case, verify=True):
 
     report_path = case_dir / f"{case}_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
-    print(f"[+] Report written to: {report_path}")
+    logger.info(f"Report written to: {report_path}")
 
 # Check SHA256 hashes of outputs for all logs in a case
 def verify_output(case):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        print(f"[!] Case '{case}' doesn't exist.")
+        logger.error(f"[x] Case {case} does not exist")
         return
 
     print(f"[+] Verifying output integrity for case: {case}")
@@ -150,9 +149,9 @@ def verify_output(case):
 
         output_lines = extract_block(lines, "### [+] Output excerpt")
         cleaned = "\n".join([line.rstrip() for line in output_lines]).strip()
-        actual_hash = sha256_from_string(cleaned)
-        print(f"[DEBUG] Expected: {expected_hash}")
-        print(f"[DEBUG] Received: {actual_hash}")
+        actual_hash = compute_hash("\n".join(output_lines).strip())
+        print(f"[HASH] Expected: {expected_hash}")
+        print(f"[HASH] Received: {actual_hash}")
         result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
         print(f"{log_file.name}: {result}")
 
@@ -160,7 +159,7 @@ def verify_output(case):
 def list_case_folders():
     cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
     if not cases:
-        print("[!] No cases found.")
+        logger.error(f"[x] No cases found.")
     else:
         print("[+] Existing cases:")
         for c in cases:
