@@ -3,6 +3,11 @@ import yaml
 from jinja2 import Template
 from pathlib import Path
 from core.legal_parser import PARSERS
+from utils.log import logger
+from utils.shared_config import load_config
+from datetime import datetime
+
+config = load_config()
 
 def get_legal_explanation(tool: str) -> str:
     with open("config/explanations.yaml", "r", encoding="utf-8") as f:
@@ -10,10 +15,15 @@ def get_legal_explanation(tool: str) -> str:
 
     template_file = Path("templates/legal.md.j2")
     if not template_file.exists():
-        return "[x] No template found."
+        logger.error("[x] No template found at templates/legal.md.j2.")
+        return f"[x] Legal explanation unavailable – missing template."
 
-    with template_file.open("r", encoding="utf-8") as f:
-        template = Template(f.read())
+    try:
+        with template_file.open("r", encoding="utf-8") as f:
+            template = Template(f.read())
+    except Exception as e:
+        logger.error(f"[x] Template loading failed: {e}")
+        return "[x] Legal explanation rendering failed."
 
     parts = tool.strip().split()
     command = parts[0]
@@ -35,4 +45,9 @@ def get_legal_explanation(tool: str) -> str:
                 # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
                 explanation_text += "\n\n" + cmd_entry.get(flag, "")
 
-    return template.render(tool=tool, explanation=explanation_text)
+    return template.render(
+        tool=tool,
+        explanation=explanation_text,
+        analyst=config["project"]["analyst"],
+        timestamp=datetime.now(config["TIMEZONE"]).isoformat()
+    )
