@@ -2,6 +2,7 @@
 import yaml
 from jinja2 import Template
 from pathlib import Path
+from core.legal_parser import PARSERS
 
 def get_legal_explanation(tool: str) -> str:
     with open("config/explanations.yaml", "r", encoding="utf-8") as f:
@@ -14,10 +15,12 @@ def get_legal_explanation(tool: str) -> str:
     with template_file.open("r", encoding="utf-8") as f:
         template = Template(f.read())
 
-    # Erkennung von Tool und Flags
     parts = tool.strip().split()
     command = parts[0]
-    flags = parts[1:] if len(parts) > 1 else []
+    args = parts[1:]
+
+    parser = PARSERS.get(command)
+    flags = parser(args) if parser else args
 
     cmd_entry = explanations.get(command, None)
     if not cmd_entry:
