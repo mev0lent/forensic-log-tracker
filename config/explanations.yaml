@@ -1,59 +1,78 @@
-strings: >
-  Das Tool `strings` wurde verwendet, um druckbare Zeichenketten aus einem Dump zu extrahieren. Dies ist forensisch zulässig, da der Dump nicht verändert wird und wertvolle Hinweise wie Passwörter oder Konfigurationsdateien enthalten sein können.
+strings:
+  default: >
+    The tool `strings` was used to extract printable character sequences from a binary dump.
+    This is forensically valid as it does not alter the dump and can reveal valuable hints like passwords or configuration files.
+  -n: >
+    The `-n` option sets the minimum length of character sequences to be extracted. It helps filter noise in large binaries.
 
-dd: >
-  `dd` wurde verwendet, um eine 1:1-Kopie eines Datenträgers zu erstellen. Es wird im Read-Only-Modus verwendet und verändert keine Daten. Eine rechtlich zulässige Methode zur Sicherung digitaler Beweise.
+dd:
+  default: >
+    `dd` was used to create a 1:1 copy of a disk. It is typically used in read-only mode and does not alter the original data. 
+    A legally permissible method for acquiring digital evidence.
+  if: >
+    The `if=` option specifies the input file (e.g., a disk device like `/dev/sda`).
+  of: >
+    The `of=` option specifies the output file (e.g., a disk image).
+  bs: >
+    The `bs=` option sets the block size for read/write operations. It affects speed and granularity of the copy process.
 
-ls: >
-  `ls` listet Dateien in einem Verzeichnis auf. Dies dient der Übersicht, verändert aber keine Daten.
+ls:
+  default: >
+    `ls` lists files in a directory. It is used to gain an overview and does not modify data.
 
-cd: >
-  `cd` wird verwendet, um in ein Verzeichnis zu wechseln. Dies verändert keine Daten und ist forensisch unkritisch.
+cd:
+  default: >
+    `cd` is used to change directories. It does not modify data and is forensically harmless.
 
-sha1sum: >
-  `sha1sum` berechnet einen kryptographischen Fingerabdruck (SHA-1) einer Datei. Dies dient der Integritätsprüfung und wird genutzt, um Dateien eindeutig zu identifizieren.
+sha1sum:
+  default: >
+    `sha1sum` computes a SHA-1 hash of a file. It is used for integrity checking and file identification.
 
-md5sum: >
-  `md5sum` erzeugt eine MD5-Hash-Summe einer Datei. Auch wenn MD5 als kryptographisch unsicher gilt, ist es in der forensischen Praxis oft noch verbreitet für Integritätsprüfungen.
+md5sum:
+  default: >
+    `md5sum` generates an MD5 checksum of a file. Although cryptographically broken, it is still widely used for integrity checks in forensic practice.
 
-unzip: >
-  `unzip` entpackt eine ZIP-Archivdatei. Der Inhalt wird extrahiert, was Daten auf dem Zielsystem verändert. Sollte nur auf einem **virtuellen Analysesystem** oder forensisch geklonten Medium erfolgen.
+unzip:
+  default: >
+    `unzip` extracts a ZIP archive. Since it changes data on the destination system, it should only be used in **virtual analysis environments** or on forensic clones.
+  -d: >
+    The `-d` option specifies the destination directory for extracted files. Useful to keep extracted data organized.
 
-mmls: >
-  `mmls` analysiert das Partition-Layout einer Datenträgerabbilddatei, ohne diese zu verändern. Es zeigt Partitionen, Offsets und Längen – ein typischer forensischer Schritt vor dem Mounten.
+mmls:
+  default: >
+    `mmls` analyzes the partition layout of a disk image without modifying it. 
+    It shows partitions, offsets, and sizes — a typical forensic step before mounting.
+  -t: >
+    The `-t` option specifies the partition table type (e.g., DOS, GPT).
+  -b: >
+    The `-b` option specifies the block size of the image. This ensures correct offset calculation.
 
 mkdir:
   default: >
-    `mkdir` erstellt ein Verzeichnis. Im forensischen Kontext wird es oft genutzt, um Zielordner für Mountpoints oder Exportdateien anzulegen.
-
+    `mkdir` creates a directory. In forensic workflows, it is often used to prepare target folders for mounts or exported data.
   -p: >
-    Die Option `-p` erstellt auch übergeordnete Verzeichnisse, falls sie nicht existieren. Sie verhindert zudem Fehler, wenn das Zielverzeichnis bereits vorhanden ist.
+    The `-p` option ensures that parent directories are created as needed. It also avoids errors if the target directory already exists.
 
 losetup:
   default: >
-    `losetup` erstellt ein Loop-Device, um ein Dateisystem-Image als Blockgerät bereitzustellen. Dies ist notwendig, um z. B. Partitionen aus einem Disk-Image gezielt anzusprechen.
-
+    `losetup` sets up a loop device to treat a file (like a disk image) as a block device.
+    This is needed to work with partitions inside forensic disk images.
   -o: >
-    Die Option `-o` gibt den Offset in Bytes an, ab dem das Loop-Device beginnen soll – z. B. zum Mounten einer bestimmten Partition.
-
+    The `-o` option sets the byte offset at which the loop device should start. 
+    Useful for mounting specific partitions.
   --find: >
-    Sucht automatisch das nächste freie Loop-Gerät (z. B. `/dev/loop0`).
-
+    Automatically finds the next available loop device (e.g., `/dev/loop0`).
   --show: >
-    Gibt das erstellte Loop-Gerät direkt aus – nützlich zur automatisierten Weiterverarbeitung im Skript.
+    Outputs the created loop device — useful for automation and scripting.
 
 mount:
   default: >
-    Das Tool `mount` wird verwendet, um Dateisysteme einzuhängen. In einem forensischen Kontext ist besondere Vorsicht geboten, da durch das Einhängen ein Speichermedium möglicherweise verändert werden kann.
-
+    `mount` is used to attach a filesystem to the directory tree. In forensic contexts, it must be used cautiously, as mounting can alter timestamps or content.
   -o: >
-    Die Option `-o` erlaubt das Setzen von Mount-Parametern. Sie ist besonders relevant, um das Verhalten beim Einhängen gezielt zu steuern – z. B. Schreibschutz zu aktivieren.
-
+    The `-o` option sets mount parameters — e.g., to enable read-only mode or suppress timestamp changes.
   ro: >
-    `ro` steht für `read-only`. Sie sorgt dafür, dass das eingebundene Dateisystem nicht verändert werden kann. Dies ist in der digitalen Forensik zwingend notwendig.
-
+    `ro` stands for "read-only". It ensures that the mounted filesystem is not modified. This is critical in digital forensics.
   loop: >
-    `loop` erlaubt das Mounten von Dateien als Blockgeräte (z. B. Disk-Images). Wird oft mit `losetup` kombiniert oder ersetzt dieses direkt.
-
+    The `loop` option allows mounting of files as block devices (e.g., disk images). Often used in conjunction with or instead of `losetup`.
   noatime: >
-    Die `noatime`-Option verhindert das Setzen von Zugriffszeitpunkten beim Lesen von Dateien. Dies minimiert die Änderungen am eingebundenen Dateisystem.
+    `noatime` prevents updating access timestamps when reading files. This minimizes changes to the mounted filesystem.
