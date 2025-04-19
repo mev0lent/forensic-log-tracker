@@ -28,7 +28,10 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
             output = f"[!] Command failed:\n{e.stderr}"
 
     explanation = get_legal_explanation(" ".join(cmd.split()[:4]))
-    preview_lines = config["output"].get("preview_lines", config["default_output_lines"])
+    preview_lines = config.get("output", {}).get(
+        "preview_lines",
+        config.get("execution", {}).get("default_output_lines", 20)
+    )
     hash_algo = config["output"].get("hash_algorithm", "sha256")
     output_hash = compute_hash(output, hash_algo)
 
