@@ -40,7 +40,11 @@ def run(
 
     try:
         log_path = execute_command(cmd, case, dry_run=dry_run)
-        logger.info(f"Command executed and logged: {cmd}")
+        if dry_run:
+            answer = " not"
+        else:
+            answer = ""
+        logger.info(f"Command{answer} executed, logged: {cmd}")
     except Exception as e:
         logger.error(f"[run] Command failed: {e}")
         raise typer.Exit(code=2)
