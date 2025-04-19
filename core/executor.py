@@ -13,7 +13,7 @@ config = load_config()
 
 
 def execute_command(cmd: str, case: str, dry_run: bool = False):
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(config["TIMEZONE"]).isoformat()
     case_dir = Path(f"logs/{case}")
     case_dir.mkdir(parents=True, exist_ok=True)
 

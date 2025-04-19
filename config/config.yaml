@@ -1,18 +1,22 @@
-analyst_name: "Max Mustermann"
-default_output_lines: 20
-default_timezone: "UTC"
+project:
+  analyst: "Max Mustermann"
+  timezone: "UTC"
+
+execution:
+  default_output_lines: 20
+  dry_run_label: "[!] DRY RUN: Command not executed."
+
+output:
+  language: "de"              # "en", "de" – for future translation of explanations
+  format: "md"                # "md", "html", "pdf"
+  preview_lines: 20
+  include_sha256: true
+  hash_algorithm: "sha256"
 
 gpg:
   enabled: true
   auto_verify: true
-  default_key: ""        # optional: set GPG fingerprint if desired
-
-output:
-  language: "de"          # planned: "en", "de" — for future translation of explanations
-  report_format: "md"     # planned: "md", "html", "pdf"
-  preview_lines: 20       # how much of output to include in logs
-  include_sha256: true    # toggle for SHA256 in logs
-  hash_algorithm: "sha256"
+  default_key: ""             # optional: GPG fingerprint
 
 logging:
-  level: INFO  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO                 # DEBUG, INFO, WARNING, ERROR, CRITICAL
