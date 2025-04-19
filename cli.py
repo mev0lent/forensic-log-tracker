@@ -13,7 +13,7 @@ app = typer.Typer()
 def ensure_case_exists(case: str):
     case_dir = Path(f"logs/{case}")
     if not case_dir.exists():
-        typer.echo(f"[!] Der Fall '{case}' existiert nicht. Bitte zuerst mit 'new-case' anlegen.")
+        typer.echo(f"[!] The case '{case}' does not exist. Please create it first using 'new-case'.")
         raise typer.Exit(code=1)
 
 def load_config():
@@ -21,7 +21,7 @@ def load_config():
         return yaml.safe_load(f)
 
 @app.command()
-def new_case(case: str, description: str = typer.Option("", help="Kurze Beschreibung des Falls")):
+def new_case(case: str, description: str = typer.Option("", help="Short description of the case")):
     try:
         create_case_folder(case, description)
     except Exception as e:
@@ -29,10 +29,10 @@ def new_case(case: str, description: str = typer.Option("", help="Kurze Beschrei
 
 @app.command()
 def run(
-    cmd: str = typer.Argument(..., help="Der auszuführende Befehl"),
-    case: str = typer.Option(..., "--case", "-c", help="Fall-ID (Name des Logs)"),
-    sign: bool = typer.Option(None, help="Erzeugte Logdatei GPG-signieren (Default laut config)"),
-    dry_run: bool = typer.Option(False, help="Nur simulieren, Befehl nicht wirklich ausführen.")
+    cmd: str = typer.Argument(..., help="The command to be executed"),
+    case: str = typer.Option(..., "--case", "-c", help="Case ID (log name)"),
+    sign: bool = typer.Option(None, help="Sign the generated log file with GPG (default as per config)"),
+    dry_run: bool = typer.Option(False, help="Simulate only, do not actually execute the command.")
 ):
     ensure_case_exists(case)
     config = load_config()
@@ -53,7 +53,7 @@ def run(
             logger.error(f"[run] Signing failed: {e}")
 
 @app.command()
-def analyze(case: str = typer.Option(..., "--case", "-c", help="Fall-ID")):
+def analyze(case: str = typer.Option(..., "--case", "-c", help="Case ID")):
     ensure_case_exists(case)
     analyze_case(case)
 
@@ -62,7 +62,7 @@ def list_cases():
     list_case_folders()
 
 @app.command()
-def case_info(case: str = typer.Option(..., "--case", "-c", help="Fall-ID")):
+def case_info(case: str = typer.Option(..., "--case", "-c", help="Case ID")):
     ensure_case_exists(case)
     show_case_description(case)
 
@@ -78,10 +78,11 @@ def report(
 
 @app.command()
 def verify_output(
-    case: str = typer.Option(..., "--case", "-c", help="Fall-ID für Output-Verifikation")
+    case: str = typer.Option(..., "--case", "-c", help="Case ID for output verification")
 ):
     """
-    Verifiziert den SHA256-Hash der Log-Outputs gegen den gespeicherten Hash.
+    Verifies the output hash (e.g., SHA256) of log files against the stored hash value.
+    Hash algorithm is configurable in config.yaml (output.hash_algorithm).
     """
     ensure_case_exists(case)
     from utils.reporting import verify_output

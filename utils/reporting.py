@@ -146,7 +146,8 @@ def verify_output(case):
 
         output_lines = extract_block(lines, "### [+] Output excerpt")
         cleaned = "\n".join([line.rstrip() for line in output_lines]).strip()
-        actual_hash = compute_hash("\n".join(output_lines).strip())
+        hash_algo = config.get("output", {}).get("hash_algorithm", "sha256")
+        actual_hash = compute_hash(cleaned, algorithm=hash_algo)
         print(f"[HASH] Expected: {expected_hash}")
         print(f"[HASH] Received: {actual_hash}")
         result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
