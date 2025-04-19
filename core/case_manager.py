@@ -7,5 +7,5 @@ def create_case_folder(case: str, description: str):
     desc_file = base_path / "description.txt"
 
     with desc_file.open("w", encoding="utf-8") as f:
-        f.write(f"Fall-ID: {case}\nBeschreibung: {description}\n")
+        f.write(f"Case-ID: {case}\nDescription: {description}\n")
     print(f" [+] New case created: {base_path}")

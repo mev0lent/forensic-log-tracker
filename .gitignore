@@ -176,3 +176,4 @@ cython_debug/
 
 # --- Custom for the forensic log tracker: exclude personal logs
 logs/
+.idea

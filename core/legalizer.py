@@ -9,7 +9,7 @@ def get_legal_explanation(tool: str) -> str:
 
     template_file = Path("templates/legal.md.j2")
     if not template_file.exists():
-        return "[x] Kein juristisches Template gefunden."
+        return "[x] No template found."
 
     with template_file.open("r", encoding="utf-8") as f:
         template = Template(f.read())
@@ -21,8 +21,8 @@ def get_legal_explanation(tool: str) -> str:
 
     cmd_entry = explanations.get(command, None)
     if not cmd_entry:
-        print(f"[x] Keine Erklärung für '{command}' gefunden – bitte explanations.yaml ergänzen.")
-        explanation_text = "[x] Keine spezifische Erklärung vorhanden."
+        print(f"[x] No explanation for '{command}' found – please extend explanations.yaml.")
+        explanation_text = "[x] No specific explanation found."
     else:
         if isinstance(cmd_entry, str):
             explanation_text = cmd_entry

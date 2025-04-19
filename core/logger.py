@@ -6,7 +6,7 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
     logfile = case_dir / f"{safe_time}_command.log"
 
     if dry_run:
-        preview = "[!] DRY RUN: Der Command wurde nicht wirklich ausgeführt."
+        preview = "[!] DRY RUN: the command wasn't executed."
     else:
         preview = "\n".join(output.strip().splitlines()[:max_lines])
 
@@ -16,12 +16,12 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
 
     with logfile.open("w", encoding="utf-8") as f:
         f.write(f"# [+] Timestamp: {timestamp}\n")
-        f.write(f"## [+] Fall: {case_dir.name}\n\n")
-        f.write(f"### [+] Befehl:\n`{cmd}`\n\n")
-        f.write("### [+] Auszug des Outputs (Anzahl Zeilen wie in config):\n```\n")
+        f.write(f"## [+] Case: {case_dir.name}\n\n")
+        f.write(f"### [+] Command:\n`{cmd}`\n\n")
+        f.write("### [+] Output excerpt (number of lines as in config):\n```\n")
         f.write(preview)
         f.write("\n```\n\n")
-        f.write(f"### [+] Erklärung:\n{explanation}\n\n")
+        f.write(f"### [+] Explanation:\n{explanation}\n\n")
         f.write(f"### [+] SHA256 Output Hash:\n`{output_hash}`\n")
 
     return logfile
