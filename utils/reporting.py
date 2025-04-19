@@ -32,21 +32,58 @@ def analyze_case(case):
         logger.error(f"[x] No signatures found.")
 
 # Extract output block from log content
-def extract_block(lines, start_contains):
+def extract_block(lines, label="Output excerpt"):
+    """
+    Extracts a code block following a specific label.
+    Supports slight variations like 'Output Preview', spacing, or casing.
+    """
+    label_variants = [
+        label,
+        "Output excerpt",
+        "Output preview",
+        "Output section",
+    ]
+
     try:
-        start = next(i for i, l in enumerate(lines) if start_contains in l)
-        start_code = next(i for i in range(start, len(lines)) if lines[i].strip() == "```") + 1
-        end_code = next(i for i in range(start_code, len(lines)) if lines[i].strip() == "```")
-        return lines[start_code:end_code]
+        # Find the line index containing one of the label variants
+        start = next(
+            i for i, l in enumerate(lines)
+            if any(variant.lower() in l.lower() for variant in label_variants)
+        )
+
+        # Find first triple backtick line after label
+        start_block = next(
+            i for i in range(start, len(lines))
+            if lines[i].strip().startswith("```")
+        )
+
+        # Find matching closing backtick block
+        end_block = next(
+            i for i in range(start_block + 1, len(lines))
+            if lines[i].strip().startswith("```")
+        )
+
+        return "\n".join(lines[start_block + 1:end_block]).strip()
     except StopIteration:
-        logger.error(f"[x] Section not found found.")
-        return ["[!] Section not found."]
+        return "[!] Output not found."
 
 # Extract legal explanation section
 def extract_explanation(lines):
+    header_patterns = [
+        "### [+] Erklärung",
+        "### [+] Legal Context",
+    ]
     try:
-        start = next(i for i, l in enumerate(lines) if "### [+] Erklärung" in l)
-        end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("###")), len(lines))
+        # Try all known headers until one matches
+        start = next(
+            i for i, l in enumerate(lines)
+            if any(header.lower() in l.lower() for header in header_patterns)
+        )
+        # Search for next section (starts with any heading)
+        end = next(
+            (i for i in range(start + 1, len(lines)) if lines[i].startswith("###")),
+            len(lines)
+        )
         return "\n".join(lines[start + 1:end]).strip()
     except StopIteration:
         return "[!] Explanation not found."
@@ -78,7 +115,7 @@ def generate_report(case, verify=True):
 
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
-        timestamp = log_file.stem.split("_")[0].replace("-", ":")
+        timestamp = log_file.stem.split("_")[0]
 
         log_text = log_file.read_text()
         lines = log_text.splitlines()
