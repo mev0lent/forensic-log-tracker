@@ -22,6 +22,7 @@ def ensure_case_exists(case: str):
 def new_case(case: str, description: str = typer.Option("", help="Short description of the case")):
     try:
         create_case_folder(case, description)
+        typer.echo(f"[+] Logs for case '{case}' will be stored in: {get_case_log_path(case)}")
     except Exception as e:
         logger.error(f"Something went wrong: {e}")
 
