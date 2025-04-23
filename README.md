@@ -34,32 +34,13 @@
 # 1. Clone the repository
 git clone <REPOSITORY-URL>
 cd forensic-log-tracker
-
-# 2. Set up a Python virtual environment
-sudo apt install python3-virtualenv
-virtualenv -p python3 log-tracker-env
-chmod +x log-tracker-env/bin/activate
-source log-tracker-env/bin/activate
-
-# 3. Install Python dependencies
-pip install -r requirements.txt
 ```
 
-> Always run commands from the **base directory of the repo** (where `cli.py` lives).
-
----
-
-### Generate a GPG Key (once)
-
+# 2. Make the setup script executable and run it
 ```bash
-gpg --full-generate-key
+chmod +x setup.sh
+./setup.sh
 ```
-
-Choose:
-- Key type: RSA and RSA
-- Key size: 4096 bits
-- Expiry: 0 (no expiration)
-- Name/email: can be fake (used offline)
 
 ---
 
@@ -179,73 +160,7 @@ GPG ensures:
 - ✅ Signatures can be verified using:
 
 ```bash
-gpg --verify logs/case001/logfile.log.sig
-```
-
----
-
-## Example Log File
-
-```markdown
-# 2025-04-17T14:52:33Z
-## Fall: case001
-
-### Befehl:
-`strings /bin/ls`
-
-### Output (Auszug):
-<FIRST_FEW_OUTPUT_LINES>
-
-### Erklärung:
-Das Tool `strings` wurde verwendet ...
-
-### SHA256 Output Hash:
-`a6f7...d3`
-```
-
----
-
-## Optional: Make It Shorter to Call
-
-```bash
-chmod +x cli.py
-```
-
-Then run:
-
-```bash
-./cli.py run "ls -la" --case case001
-```
-
-Or use an alias:
-
-```bash
-alias flt="python /full/path/to/cli.py"
-flt report --case case001
-```
-
----
-
-## Folder Structure
-
-```
-forensic-log-tracker/
-├── cli.py
-├── core/
-│   ├── executor.py
-│   ├── case_manager.py
-│   ├── logger.py
-│   ├── gpg_signer.py
-│   └── legalizer.py
-├── utils/
-│   └── reporting.py
-├── config/
-│   ├── config.yaml
-│   └── explanations.yaml
-├── templates/
-│   └── legal.md.j2
-├── logs/  # auto-generated, excluded from git
-└── requirements.txt
+gpg --verify path/to/repo/logs/case001/logfile.log.sig
 ```
 
 ---

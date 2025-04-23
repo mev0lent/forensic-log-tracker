@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 clear
 
 cat << "EOF"
@@ -55,6 +54,35 @@ echo "" >> "$shell_rc"
 echo "# forensic-log-tracker CLI" >> "$shell_rc"
 echo "alias flt='python3 \$FLT_REPO/cli.py'" >> "$shell_rc"
 echo "export FLT_REPO=\"$repo_path\"" >> "$shell_rc"
+
+# Python environment setup
+echo
+echo "[+] Installing virtualenv and setting up Python environment..."
+sudo apt update
+sudo apt install -y python3-virtualenv
+
+cd "$repo_path"
+virtualenv -p python3 log-tracker-env
+source log-tracker-env/bin/activate
+pip install -r requirements.txt
+
+echo "[+] Python virtual environment created and dependencies installed."
+
+# GPG key check and prompt
+echo
+echo "[!] Checking for existing GPG keys..."
+if gpg --list-keys | grep -q sec; then
+    echo "[+] GPG key already exists. Skipping generation."
+else
+    echo "[!] No GPG key found."
+    echo "[!] It's recommended to create one now."
+    read -rp "[?] Generate a new GPG key now? (y/n): " gen_key
+    if [[ "$gen_key" =~ ^[Yy]$ ]]; then
+        gpg --full-generate-key
+    else
+        echo "[!] Skipping GPG key creation. You can run 'gpg --full-generate-key' later."
+    fi
+fi
 
 echo
 echo "[+] Setup complete"
