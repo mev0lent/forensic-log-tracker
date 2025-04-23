@@ -153,7 +153,7 @@ def generate_report(case, verify=True):
         if "[DRY RUN]" in output_excerpt:
             report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")
 
-        report_lines.append(f"#### Juristische Einordnung:\n{explanation}\n---\n")
+        report_lines.append(f"#### Context:\n{explanation}\n---\n")
 
     report_lines.append("\n## [+] GPG-Overview")
     report_lines.append("Each `.log`-file was digitally signed with GPG.")

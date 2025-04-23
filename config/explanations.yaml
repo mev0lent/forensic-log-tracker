@@ -31,6 +31,10 @@ sha1sum:
 md5sum:
   default: >
     `md5sum` generates an MD5 checksum of a file. Although cryptographically broken, it is still widely used for integrity checks in forensic practice.
+  -c: >
+    The `-c` option checks file hashes against a list. Often used to verify integrity of copied forensic files.
+  --tag: >
+    Outputs in a tagged format compatible with standard verification tools.
 
 unzip:
   default: >
@@ -68,6 +72,8 @@ losetup:
 mount:
   default: >
     `mount` is used to attach a filesystem to the directory tree. In forensic contexts, it must be used cautiously, as mounting can alter timestamps or content.
+  -t: >
+    The `-t` option specifies the filesystem type (e.g., ext4, ntfs). This helps ensure the correct mount behavior.
   -o: >
     The `-o` option sets mount parameters — e.g., to enable read-only mode or suppress timestamp changes.
   ro: >
@@ -76,3 +82,16 @@ mount:
     The `loop` option allows mounting of files as block devices (e.g., disk images). Often used in conjunction with or instead of `losetup`.
   noatime: >
     `noatime` prevents updating access timestamps when reading files. This minimizes changes to the mounted filesystem.
+  nouser: >
+    Prevents user-space mounting — reinforces control by the investigator.
+    
+touch:
+  default: >
+    `touch` updates the timestamp of a file or creates an empty one if it does not exist. In digital forensics, this should be avoided on evidence sources but may be used to prepare logging or export files.
+
+shasum:
+  default: >
+    `shasum` generates SHA hash values (SHA-1 by default unless specified). It is used to verify file integrity. In forensic contexts, it is recommended to specify stronger hashes like SHA-256.
+  -a: >
+    The `-a` option allows selection of the SHA variant (e.g., 1, 256, 512). Always use SHA-256 or higher for forensics.
+

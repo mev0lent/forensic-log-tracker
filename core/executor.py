@@ -13,25 +13,32 @@ config = load_config()
 
 
 def execute_command(cmd: str, case: str, dry_run: bool = False):
+    from datetime import datetime
+    from pathlib import Path
+    import subprocess
+
     timestamp = datetime.now(config["TIMEZONE"]).isoformat()
     case_dir = Path(f"logs/{case}")
     case_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"Executing command: {cmd}")
+
     if dry_run:
         output = "[!] DRY RUN: Command not executed."
     else:
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
-            output = result.stdout
+            result = subprocess.run(
+                ["bash", "-i", "-c", cmd],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            output = f"[STDOUT]\n{result.stdout}\n[STDERR]\n{result.stderr}"
         except subprocess.CalledProcessError as e:
             output = f"[!] Command failed:\n{e.stderr}"
 
     explanation = get_legal_explanation(" ".join(cmd.split()[:4]))
-    preview_lines = config.get("output", {}).get(
-        "preview_lines",
-        config.get("execution", {}).get("default_output_lines", 20)
-    )
+    preview_lines = config.get("output", {}).get("preview_lines", 20)
     hash_algo = config["output"].get("hash_algorithm", "sha256")
     output_hash = compute_hash(output, hash_algo)
 
