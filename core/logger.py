@@ -15,12 +15,12 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
         f.write(f"# [+] Timestamp: {timestamp}\n")
         f.write(f"## [+] Case: {case_dir.name}\n\n")
         f.write(f"### [+] Command:\n`{cmd}`\n\n")
-        f.write("### [+] Output excerpt (number of lines as in config):\n```\n")
+        f.write("### [+] Output:\n```\n")
         f.write(preview)
         f.write("\n```\n\n")
         f.write(f"### [+] Explanation:\n{explanation}\n\n")
         f.write(f"### [+] SHA256 Output Hash:\n`{output_hash}`\n")
-        logger.info(f"Log written to: {logfile}")
+        logger.info(f"[+] Log written to: {logfile}")
 
     return logfile
 

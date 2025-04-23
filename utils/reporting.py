@@ -103,14 +103,14 @@ def generate_report(case, verify=True):
         desc_lines = description_file.read_text().splitlines()
         description = next((l for l in desc_lines if "Description:" in l), "").replace("Description:", "").strip()
 
-    report_lines = [f"# [+] Forensic report of case: {case}\n", f"## [---] Description\n{description}\n"]
+    report_lines = [f"# [++] Forensic report of case: {case}\n", f"## [++] Description\n{description}\n"]
 
     log_files = sorted(case_dir.glob("*.log"))
     if not log_files:
         logger.warning(f"No log files found in {case_dir}")
         return
 
-    report_lines.append("\n## [---] Executed commands & logs\n")
+    report_lines.append("\n## [++] Executed commands & logs\n")
 
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
@@ -129,7 +129,7 @@ def generate_report(case, verify=True):
                 if "`" in lines[i + 1]:
                     sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
 
-        output_lines = extract_block(lines, "### [+] Output excerpt")
+        output_lines = extract_block(lines, "### [+] Output")
         output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
         explanation = extract_explanation(lines)
 
@@ -147,12 +147,12 @@ def generate_report(case, verify=True):
         report_lines.append(f"- Timestamp: `{timestamp}`")
         report_lines.append(f"- GPG-signature: {sig_status}")
         report_lines.append(f"- SHA256: `{sha}`\n")
-        report_lines.append(f"#### Output excerpt:\n```\n{output_excerpt}\n```\n")
+        report_lines.append(f"#### Output:\n```\n{output_excerpt}\n```\n")
 
         if "[DRY RUN]" in output_excerpt:
             report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")
 
-        report_lines.append(f"#### Context:\n{explanation}\n---\n")
+        report_lines.append(f"#### Context:\n{explanation}\n")
 
     report_lines.append("\n## [+] GPG-Overview")
     report_lines.append("Each `.log`-file was digitally signed with GPG.")
