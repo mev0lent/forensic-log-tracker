@@ -1,10 +1,27 @@
 # utils/pathing.py
+
 from pathlib import Path
 from functools import lru_cache
+import os
 
-# Ensures BASE_DIR is fixed, no matter where the script is run from
-BASE_DIR = Path(__file__).resolve().parents[1]  # this stays safe even if deeply nested
+# Path to persistent environment config file
+FLT_ENV_PATH = Path.home() / ".flt_env"
 
+# Attempt to load FLT_REPO from the config file
+BASE_DIR = None
+
+if FLT_ENV_PATH.exists():
+    env_lines = FLT_ENV_PATH.read_text().splitlines()
+    for line in env_lines:
+        if line.startswith("FLT_REPO="):
+            BASE_DIR = Path(line.split("=", 1)[1].strip().strip('"'))
+            break
+
+# Validate that BASE_DIR is usable
+if not BASE_DIR or not BASE_DIR.exists():
+    raise RuntimeError("❌ FLT_REPO is not set correctly in ~/.flt_env. Please run setup.sh to configure the project path.")
+
+# Paths used throughout the app
 @lru_cache()
 def get_config_path(filename="config.yaml"):
     return BASE_DIR / "config" / filename
