@@ -2,7 +2,7 @@
 from pathlib import Path
 from functools import lru_cache
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 @lru_cache()
 def get_config_path(filename="config.yaml"):
