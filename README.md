@@ -86,9 +86,9 @@ output:
 
 ### `config/explanations.yaml`
 
-This file maps commands (and their flags) to **German legal explanations**.
+This file maps commands (and their flags) to **formal explanations**.
 
-> Explanations are written in formal legal German. You can expand this YAML to include more tools and options.
+> Explanations are written in formal terms. You can expand this YAML to include more tools and options.
 
 ---
 
