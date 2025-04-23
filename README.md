@@ -51,18 +51,28 @@ chmod +x setup.sh
 Customize the following values:
 
 ```yaml
-analyst_name: "Your Name"
-default_output_lines: 20
-default_timezone: "UTC"
+project:
+  analyst: "Max Mustermann"
+  timezone: "UTC"
+
+execution:
+  default_output_lines: 20
+  dry_run_label: "[!] DRY RUN: Command not executed."
+
+output:
+  language: "de"              # "en", "de" – for future translation of explanations
+  format: "md"                # "md", "html", "pdf" - NOT WORKING YET
+  preview_lines: 20
+  include_sha256: true
+  hash_algorithm: "sha256"
 
 gpg:
   enabled: true
   auto_verify: true
+  default_key: ""             # optional: GPG fingerprint
 
-output:
-  preview_lines: 20
-  include_sha256: true
-  report_format: "md"
+logging:
+  level: INFO                 # DEBUG, INFO, WARNING, ERROR, CRITICAL
 ```
 
 ### `config/explanations.yaml`
@@ -78,13 +88,13 @@ This file maps commands (and their flags) to **formal explanations**.
 ### Create a case folder
 
 ```bash
-python cli.py new-case case001 --description "Investigating suspicious USB stick"
+flt new-case case001 --description "Investigating suspicious USB stick"
 ```
 
 ### Run a forensic command
 
 ```bash
-python cli.py run "strings /bin/ls" --case case001
+flt run "strings /bin/ls" --case case001
 ```
 
 - Creates a `.log` and `.log.sig` file in `logs/case001/`
@@ -94,7 +104,7 @@ python cli.py run "strings /bin/ls" --case case001
 #### Simulate a command without executing it (dry-run)
 
 ```bash
-python cli.py run "fdisk -l /dev/sdb" --case case001 --dry-run
+flt run "fdisk -l /dev/sdb" --case case001 --dry-run
 ```
 The command is not actually executed.
 A log file is still created with:
@@ -113,13 +123,13 @@ Useful for documenting intended actions without modifying data or evidence
 ### Analyze logs for a case
 
 ```bash
-python cli.py analyze --case case001
+flt analyze --case case001
 ```
 
 ### View case info
 
 ```bash
-python cli.py case-info --case case001
+flt case-info --case case001
 ```
 
 ---
@@ -127,7 +137,7 @@ python cli.py case-info --case case001
 ### Generate a full report
 
 ```bash
-python cli.py report --case case001
+flt report --case case001
 ```
 
 Creates:  
@@ -145,7 +155,7 @@ Includes:
 ### Verify output hashes
 
 ```bash
-python cli.py verify-output --case case001
+flt verify-output --case case001
 ```
 
 This checks whether the SHA256 hash stored in each log matches the actual output hash.

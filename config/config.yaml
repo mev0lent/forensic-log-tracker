@@ -8,7 +8,7 @@ execution:
 
 output:
   language: "de"              # "en", "de" – for future translation of explanations
-  format: "md"                # "md", "html", "pdf"
+  format: "md"                # "md", "html", "pdf" - NOT WORKING YET
   preview_lines: 20
   include_sha256: true
   hash_algorithm: "sha256"
