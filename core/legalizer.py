@@ -6,14 +6,15 @@ from core.legal_parser import PARSERS
 from utils.log import logger
 from utils.shared_config import load_config
 from datetime import datetime
+from utils.pathing import get_template_path, get_config_path
 
 config = load_config()
 
 def get_legal_explanation(tool: str) -> str:
-    with open("config/explanations.yaml", "r", encoding="utf-8") as f:
+    with get_config_path("explanations.yaml").open("r", encoding="utf-8") as f:
         explanations = yaml.safe_load(f)
 
-    template_file = Path("templates/legal.md.j2")
+    template_file = get_template_path()
     if not template_file.exists():
         logger.error("[x] No template found at templates/legal.md.j2.")
         return f"[x] Legal explanation unavailable – missing template."

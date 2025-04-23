@@ -8,7 +8,7 @@ from core.logger import write_log
 from core.legalizer import get_legal_explanation
 from utils.log import logger
 from utils.shared_config import load_config
-
+from utils.pathing import get_case_log_path
 config = load_config()
 
 
@@ -18,7 +18,8 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
     import subprocess
 
     timestamp = datetime.now(config["TIMEZONE"]).isoformat()
-    case_dir = Path(f"logs/{case}")
+    case_dir = get_case_log_path(case)
+
     case_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"Executing command: {cmd}")

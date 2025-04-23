@@ -1,9 +1,9 @@
 # utils/log.py
 import logging
 import yaml
-from pathlib import Path
+from utils.pathing import get_config_path, get_log_dir
 
-LOG_DIR = Path("logs")
+LOG_DIR = get_log_dir()
 LOG_DIR.mkdir(exist_ok=True)
 
 # Fallback default
@@ -11,7 +11,7 @@ log_level = "INFO"
 
 # Try reading config.yaml
 try:
-    with open("config/config.yaml", "r", encoding="utf-8") as f:
+    with get_config_path().open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
         log_level = config.get("logging", {}).get("level", "INFO").upper()
 except Exception:

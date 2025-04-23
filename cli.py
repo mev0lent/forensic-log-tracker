@@ -7,18 +7,16 @@ from core.case_manager import create_case_folder
 from core.gpg_signer import sign_file
 from utils.reporting import generate_report, analyze_case, list_case_folders, show_case_description
 from pathlib import Path
+from utils.shared_config import load_config
+from utils.pathing import get_case_log_path
 
 app = typer.Typer()
 
 def ensure_case_exists(case: str):
-    case_dir = Path(f"logs/{case}")
+    case_dir = get_case_log_path(case)
     if not case_dir.exists():
         typer.echo(f"[!] The case '{case}' does not exist. Please create it first using 'new-case'.")
         raise typer.Exit(code=1)
-
-def load_config():
-    with open("config/config.yaml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 @app.command()
 def new_case(case: str, description: str = typer.Option("", help="Short description of the case")):

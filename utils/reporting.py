@@ -6,12 +6,12 @@ import yaml
 from core.hasher import compute_hash
 from utils.log import logger
 from utils.shared_config import load_config
-
+from utils.pathing import get_case_log_path, get_log_dir
 config = load_config()
 
 # Print available logs and GPG signatures for a case
 def analyze_case(case):
-    case_dir = Path(f"logs/{case}")
+    case_dir = get_case_log_path(case)
     if not case_dir.exists():
         logger.error(f"[x] Case {case} does not exist")
         return
@@ -93,7 +93,7 @@ def generate_report(case, verify=True):
     logger.info(f"Generating report for case: {case}")
     preview_lines = config.get("output", {}).get("preview_lines", 20)
 
-    case_dir = Path(f"logs/{case}")
+    case_dir = get_case_log_path(case)
     if not case_dir.exists():
         logger.error(f"[x] Case {case} does not exist")
         return
@@ -165,7 +165,7 @@ def generate_report(case, verify=True):
 
 # Check SHA256 hashes of outputs for all logs in a case
 def verify_output(case):
-    case_dir = Path(f"logs/{case}")
+    case_dir = get_case_log_path(case)
     if not case_dir.exists():
         logger.error(f"[x] Case {case} does not exist")
         return
@@ -192,7 +192,7 @@ def verify_output(case):
 
 # Print a list of all case folders
 def list_case_folders():
-    cases = [d.name for d in Path("logs").iterdir() if d.is_dir()]
+    cases = [d.name for d in get_log_dir().iterdir() if d.is_dir()]
     if not cases:
         logger.error(f"[x] No cases found.")
     else:
@@ -202,7 +202,7 @@ def list_case_folders():
 
 # Show case description file content
 def show_case_description(case: str):
-    desc_file = Path(f"logs/{case}/description.txt")
+    desc_file = get_case_log_path(case) / "description.txt"
     if not desc_file.exists():
         print("[!] No case description found.")
         return
