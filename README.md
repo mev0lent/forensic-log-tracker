@@ -30,6 +30,13 @@
 
 ### Setup Steps
 
+Start with
+```bash
+virtualenv -p python3 log-tracker-env
+source log-tracker-env/bin/activate
+```
+to activate your virtual environment for **clean dependency management**.
+
 ```bash
 # 1. Clone the repository
 git clone <REPOSITORY-URL>
