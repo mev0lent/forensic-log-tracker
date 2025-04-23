@@ -18,9 +18,10 @@ def get_log_dir():
     path.mkdir(exist_ok=True)
     return path
 
-def get_case_log_path(case_id: str) -> Path:
+def get_case_log_path(case_id: str, create: bool = False) -> Path:
     path = get_log_dir() / case_id
-    path.mkdir(parents=True, exist_ok=True)
+    if create:
+        path.mkdir(parents=True, exist_ok=True)
     return path
 
 @lru_cache()

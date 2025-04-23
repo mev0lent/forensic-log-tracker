@@ -13,7 +13,7 @@ from utils.pathing import get_case_log_path
 app = typer.Typer()
 
 def ensure_case_exists(case: str):
-    case_dir = get_case_log_path(case)
+    case_dir = get_case_log_path(case, create=False)
     if not case_dir.exists():
         typer.echo(f"[!] The case '{case}' does not exist. Please create it first using 'new-case'.")
         raise typer.Exit(code=1)
@@ -21,8 +21,9 @@ def ensure_case_exists(case: str):
 @app.command()
 def new_case(case: str, description: str = typer.Option("", help="Short description of the case")):
     try:
+        case_dir = get_case_log_path(case, create=True)
         create_case_folder(case, description)
-        typer.echo(f"[+] Logs for case '{case}' will be stored in: {get_case_log_path(case)}")
+        typer.echo(f"[+] Logs for case '{case}' will be stored in: {case_dir}")
     except Exception as e:
         logger.error(f"Something went wrong: {e}")
 
