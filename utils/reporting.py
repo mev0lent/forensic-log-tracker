@@ -91,7 +91,6 @@ def extract_explanation(lines):
 # Build a complete Markdown report for a forensic case
 def generate_report(case, verify=True):
     logger.info(f"Generating report for case: {case}")
-    preview_lines = config.get("output", {}).get("preview_lines", 20)
 
     case_dir = get_case_log_path(case)
     if not case_dir.exists():
@@ -131,7 +130,7 @@ def generate_report(case, verify=True):
                     sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
 
         output_lines = extract_block(lines, "### [+] Output excerpt")
-        output_excerpt = "\n".join(output_lines[:preview_lines])
+        output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
         explanation = extract_explanation(lines)
 
         sig_status = "[!] Not Signed"

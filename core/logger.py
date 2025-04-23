@@ -9,7 +9,7 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
     if dry_run:
         preview = "[!] DRY RUN: the command wasn't executed."
     else:
-        preview = output.strip()
+        preview = output
 
     with logfile.open("w", encoding="utf-8") as f:
         f.write(f"# [+] Timestamp: {timestamp}\n")
