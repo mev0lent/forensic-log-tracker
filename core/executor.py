@@ -18,9 +18,7 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
     import subprocess
 
     timestamp = datetime.now(config["TIMEZONE"]).isoformat()
-    case_dir = get_case_log_path(case)
-
-    case_dir.mkdir(parents=True, exist_ok=True)
+    case_dir = get_case_log_path(case, create=False)
 
     logger.info(f"Executing command: {cmd}")
 
