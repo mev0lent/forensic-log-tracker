@@ -42,4 +42,4 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
     output_hash = compute_hash(output, hash_algo)
 
     logfile = write_log(case_dir, cmd, output, explanation, timestamp, preview_lines, dry_run, output_hash)
-    return logfile
+    return logfile, output

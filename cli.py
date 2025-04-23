@@ -39,7 +39,7 @@ def run(
     use_signing = sign if sign is not None else config.get("gpg", {}).get("enabled", True)
 
     try:
-        log_path = execute_command(cmd, case, dry_run=dry_run)
+        log_path, output = execute_command(cmd, case, dry_run=dry_run)
         if dry_run:
             answer = " not"
         else:
@@ -55,6 +55,9 @@ def run(
             logger.info(f"Log file signed: {log_path}")
         except Exception as e:
             logger.error(f"[run] Signing failed: {e}")
+
+    if output:
+        print(f"\n[+] Command Output:\n{output}")
 
 @app.command()
 def analyze(case: str = typer.Option(..., "--case", "-c", help="Case ID")):
