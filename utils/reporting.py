@@ -159,7 +159,7 @@ def generate_report(case, verify=True):
 
         elif log_file.name.endswith("_comment.log"):
             # -- Process comment logs --
-            report_lines.append(f"[+] Timestamp: `{timestamp}`\n")
+            report_lines.append(f"### [+] Timestamp: `{timestamp}`")
             report_lines.append(log_text)
             report_lines.append("---\n")
 
