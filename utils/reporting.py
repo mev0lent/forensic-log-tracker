@@ -161,7 +161,7 @@ def generate_report(case, verify=True):
             # -- Process comment logs --
             report_lines.append(f"### [+] Analyst Comment")
             report_lines.append(f"- Timestamp: `{timestamp}`\n")
-            report_lines.append("```\n" + log_text + "\n```\n")
+            report_lines.append(log_text)
             report_lines.append("---\n")
 
     report_lines.append("\n## [+] GPG-Overview")
