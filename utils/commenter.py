@@ -20,9 +20,9 @@ def write_comment(case: str, text: str) -> Path:
     analyst = config.get("project", {}).get("analyst", "Unknown Analyst")
 
     content = [
-        f"### [+] Analyst: {analyst}",
+        f"### [+] Comment from analyst: {analyst}",
         "",
-        f"### [+] Comment:",
+        f"### [+] Content:",
         text,
         ""
     ]
