@@ -110,7 +110,7 @@ def generate_report(case, verify=True):
         logger.warning(f"No log files found in {case_dir}")
         return
 
-    report_lines.append("\n## [++] Executed commands & logs\n")
+    report_lines.append("\n## [++] Timeline of Commands and Comments\n")
 
     for log_file in log_files:
         sig_file = log_file.with_suffix(log_file.suffix + ".sig")
@@ -119,49 +119,59 @@ def generate_report(case, verify=True):
         log_text = log_file.read_text()
         lines = log_text.splitlines()
 
-        cmd = "*Unknown*"
-        sha = "*Not found*"
+        if log_file.name.endswith("_command.log"):
+            # -- Process command logs --
+            cmd = "*Unknown*"
+            sha = "*Not found*"
 
-        for i, line in enumerate(lines):
-            if "Command" in line and i + 1 < len(lines) and "`" in lines[i + 1]:
-                cmd = re.findall(r"`(.*?)`", lines[i + 1])[0]
-            elif "### [+] SHA256 Output Hash:" in line and i + 1 < len(lines):
-                if "`" in lines[i + 1]:
-                    sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
+            for i, line in enumerate(lines):
+                if "Command" in line and i + 1 < len(lines) and "`" in lines[i + 1]:
+                    cmd = re.findall(r"`(.*?)`", lines[i + 1])[0]
+                elif "### [+] SHA256 Output Hash:" in line and i + 1 < len(lines):
+                    if "`" in lines[i + 1]:
+                        sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
 
-        output_lines = extract_block(lines, "### [+] Output")
-        output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
-        explanation = extract_explanation(lines)
+            output_lines = extract_block(lines, "### [+] Output")
+            output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
+            explanation = extract_explanation(lines)
 
-        sig_status = "[!] Not Signed"
-        if verify and sig_file.exists():
-            try:
-                subprocess.run(["gpg", "--verify", str(sig_file)], capture_output=True, check=True)
-                sig_status = "[+] Valid"
-            except subprocess.CalledProcessError:
-                sig_status = "[x] Invalid"
-        elif sig_file.exists():
-            sig_status = "[+] (not checked)"
+            sig_status = "[!] Not Signed"
+            if verify and sig_file.exists():
+                try:
+                    subprocess.run(["gpg", "--verify", str(sig_file)], capture_output=True, check=True)
+                    sig_status = "[+] Valid"
+                except subprocess.CalledProcessError:
+                    sig_status = "[x] Invalid"
+            elif sig_file.exists():
+                sig_status = "[+] (not checked)"
 
-        report_lines.append(f"### [+] Command: `{cmd}`")
-        report_lines.append(f"- Timestamp: `{timestamp}`")
-        report_lines.append(f"- GPG-signature: {sig_status}")
-        report_lines.append(f"- SHA256: `{sha}`\n")
-        report_lines.append(f"#### Output:\n```\n{output_excerpt}\n```\n")
+            report_lines.append(f"### [+] Command: `{cmd}`")
+            report_lines.append(f"- Timestamp: `{timestamp}`")
+            report_lines.append(f"- GPG-signature: {sig_status}")
+            report_lines.append(f"- SHA256: `{sha}`\n")
+            report_lines.append(f"#### Output:\n```\n{output_excerpt}\n```\n")
 
-        if "[DRY RUN]" in output_excerpt:
-            report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")
+            if "[DRY RUN]" in output_excerpt:
+                report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")
 
-        report_lines.append(f"#### Context:\n{explanation}\n")
-        report_lines.append("---\n")
+            report_lines.append(f"#### Context:\n{explanation}\n")
+            report_lines.append("---\n")
+
+        elif log_file.name.endswith("_comment.log"):
+            # -- Process comment logs --
+            report_lines.append(f"### [+] Analyst Comment")
+            report_lines.append(f"- Timestamp: `{timestamp}`\n")
+            report_lines.append("```\n" + log_text + "\n```\n")
+            report_lines.append("---\n")
 
     report_lines.append("\n## [+] GPG-Overview")
-    report_lines.append("Each `.log`-file was digitally signed with GPG.")
+    report_lines.append("Each `.log`-file was digitally signed with GPG where applicable.")
     report_lines.append("The signature status is documented per command.\n")
 
     report_path = case_dir / f"{case}_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
     logger.info(f"Report written to: {report_path}")
+
 
 # Check SHA256 hashes of outputs for all logs in a case
 def verify_output(case):

@@ -7,6 +7,7 @@ from core.case_manager import create_case_folder
 from core.gpg_signer import sign_file
 from utils.reporting import generate_report, analyze_case, list_case_folders, show_case_description
 from pathlib import Path
+from utils.commenter import write_comment
 from utils.shared_config import load_config
 from utils.pathing import get_case_log_path
 
@@ -94,6 +95,21 @@ def verify_output(
     ensure_case_exists(case)
     from utils.reporting import verify_output
     verify_output(case)
+
+@app.command()
+def comment(
+    case: str = typer.Option(..., "--case", "-c", help="Case ID"),
+    text: str = typer.Option(..., "--text", "-t", help="Comment text to add")
+):
+    """
+    Add a manual comment to a case (signed with GPG if enabled).
+    """
+    ensure_case_exists(case)
+    try:
+        comment_path = write_comment(case, text)
+        typer.echo(f"[+] Comment added and signed: {comment_path}")
+    except Exception as e:
+        typer.echo(f"[!] Failed to add comment: {e}")
 
 if __name__ == "__main__":
     app()
