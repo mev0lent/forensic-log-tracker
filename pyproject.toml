@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "CLI tool for secure and legally compliant forensic log tracking"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "Niklas Heringer", email = "ping@niklas-heringer.com"}]
 dependencies = [
     "click==8.1.8",
@@ -24,6 +24,9 @@ dependencies = [
     "typing_extensions==4.13.2"
 ]
 
+[project.urls]
+Homepage = "https://github.com/mev0lent/forensic-log-tracker"
+
 [project.scripts]
 flt = "cli:app"
 
@@ -31,5 +34,6 @@ flt = "cli:app"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["utils", "core", "config", "forensic_log_tracker"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["utils", "core", "config"]
