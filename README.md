@@ -28,14 +28,15 @@
 
 ---
 
-### Setup Steps
+Absolutely — here's the **clean, modernized, and updated `README.md` setup block** that reflects your current project setup with helpful comments and fallback support for `requirements.txt`:
 
-Start with
-```bash
-virtualenv -p python3 log-tracker-env
-source log-tracker-env/bin/activate
-```
-to activate your virtual environment for **clean dependency management**.
+---
+
+### 🚀 Setup Steps
+
+> This tool uses a **modern `pyproject.toml`-based setup** with an automated script and alias integration. You can be up and running in under a minute.
+
+---
 
 ```bash
 # 1. Clone the repository
@@ -43,10 +44,45 @@ git clone <REPOSITORY-URL>
 cd forensic-log-tracker
 ```
 
-# 2. Make the setup script executable and run it
 ```bash
+# 2. Make the setup script executable and run it
 chmod +x setup.sh
 ./setup.sh
+```
+
+🧠 **What this does for you:**
+- Creates a local Python virtual environment in `forensic-log-venv/`
+- Installs all dependencies listed in `pyproject.toml`
+- Sets up a shell alias `flt` to run the tool from anywhere
+- Optionally helps you generate a GPG key
+- Leaves your system environment untouched
+
+🖥️ **Before first use**, activate the environment and alias:
+
+```bash
+source ~/.bashrc       # or ~/.zshrc depending on your shell
+source forensic-log-venv/bin/activate
+```
+
+Then you're ready to go:
+
+```bash
+flt new-case case001 --description "Test Case"
+flt run "ls -la" --case case001
+```
+... more on that below
+
+
+### 📦 Alternative setup: `requirements.txt` still available
+
+While we recommend using the `pyproject.toml`-based approach for reproducibility and clean isolation, we’ve left a `requirements.txt` in the repo for convenience.  
+If you prefer the traditional method:
+
+```bash
+python3 -m venv alt-env
+source alt-env/bin/activate
+pip install -r requirements.txt
+python cli.py --help
 ```
 
 ---
