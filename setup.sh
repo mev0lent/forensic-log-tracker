@@ -21,52 +21,44 @@ echo
 echo "[+] Welcome to the Forensic Log Tracker Setup!"
 echo
 
-# Ask for the repo path
-echo "[!] Please enter the absolute path to your forensic-log-tracker directory."
-echo "    Example: /home/kali/Documents/forensic-log-tracker"
-echo
-read -rp "[?] Path: " repo_path
+# Detect project root automatically
+repo_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Expand ~ to full path if used
-repo_path="${repo_path/#\~/$HOME}"
+echo "[+] Setting up the project at: $repo_path"
 
-# Validate directory
-if [[ ! -d "$repo_path" ]]; then
-    echo "[x] Error: Directory does not exist: $repo_path"
-    exit 1
+# Create virtual environment if it doesn't exist
+if [[ ! -d "$repo_path/venv" ]]; then
+    echo "[+] Creating Python virtual environment..."
+    python3 -m venv "$repo_path/venv"
+else
+    echo "[*] Virtual environment already exists. Skipping creation."
 fi
 
-# Validate expected structure
-if [[ ! -f "$repo_path/cli.py" ]]; then
-    echo "[x] Error: 'cli.py' not found in that directory. Is this the correct repo?"
-    exit 1
-fi
+# Activate virtual environment
+source "$repo_path/venv/bin/activate"
 
-# Write .flt_env config
-echo "FLT_REPO=\"$repo_path\"" > "$HOME/.flt_env"
-chmod +x "$repo_path/cli.py"
+# Upgrade pip and install project dependencies
+echo "[+] Installing project dependencies using pyproject.toml..."
+pip install --upgrade pip
+pip install .
 
-# Add alias to shell config
+# Check if flt alias already exists
 shell_rc="$HOME/.bashrc"
 [[ $SHELL == *zsh ]] && shell_rc="$HOME/.zshrc"
 
-echo "" >> "$shell_rc"
-echo "# forensic-log-tracker CLI" >> "$shell_rc"
-echo "alias flt='python3 \$FLT_REPO/cli.py'" >> "$shell_rc"
-echo "export FLT_REPO=\"$repo_path\"" >> "$shell_rc"
+if ! grep -q "alias flt=" "$shell_rc"; then
+    echo "" >> "$shell_rc"
+    echo "# forensic-log-tracker CLI" >> "$shell_rc"
+    echo "alias flt='$repo_path/venv/bin/flt'" >> "$shell_rc"
+    echo "[+] Alias 'flt' added to: $shell_rc"
+else
+    echo "[*] Alias 'flt' already exists in $shell_rc. Skipping alias addition."
+fi
 
-# Python environment setup
+# Reload shell configuration
 echo
-echo "[+] Installing virtualenv and setting up Python environment..."
-sudo apt update
-sudo apt install -y python3-virtualenv
-
-cd "$repo_path"
-virtualenv -p python3 log-tracker-env
-source log-tracker-env/bin/activate
-pip install -r requirements.txt
-
-echo "[+] Python virtual environment created and dependencies installed."
+echo "[+] Reloading your shell configuration to activate the alias..."
+source "$shell_rc"
 
 # GPG key check and prompt
 echo
@@ -85,11 +77,11 @@ else
 fi
 
 echo
-echo "[+] Setup complete"
-echo "[+] Alias 'flt' added to: $shell_rc"
-echo "[!] Run: source $shell_rc or restart your terminal to activate the alias"
+echo "[+] Setup complete!"
+echo
+echo "[+] Virtual environment automatically activated."
+echo "[+] Alias 'flt' is ready to use!"
 echo
 echo "[+] Example usage:"
-echo "    flt new-case case001 --description 'Example case'"
+echo "    flt new-case case001 --description \"Example case\""
 echo "    flt run \"ls -la\" --case case001"
-echo
