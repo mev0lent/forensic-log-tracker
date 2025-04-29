@@ -2,7 +2,6 @@
 name = "forensic-log-tracker"
 version = "1.0.0"
 description = "CLI tool for secure and legally compliant forensic log tracking"
-homepage = "https://github.com/mev0lent/forensic-log-tracker"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
