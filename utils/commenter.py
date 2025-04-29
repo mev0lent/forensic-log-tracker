@@ -1,6 +1,7 @@
 # utils/commenter.py
 from datetime import datetime
 from pathlib import Path
+from utils.pathing import get_case_log_path
 from utils.shared_config import load_config
 from core.gpg_signer import sign_file
 
@@ -9,7 +10,7 @@ def write_comment(case: str, text: str) -> Path:
     Create a comment log for a case and optionally sign it.
     """
     config = load_config()
-    case_dir = Path("logs") / case
+    case_dir = get_case_log_path(case, create=False)
     if not case_dir.exists():
         raise FileNotFoundError(f"Case folder '{case}' does not exist.")
 
