@@ -125,11 +125,31 @@ def generate_report(case, verify=True):
             sha = "*Not found*"
 
             for i, line in enumerate(lines):
-                if "Command" in line and i + 1 < len(lines) and "`" in lines[i + 1]:
-                    cmd = re.findall(r"`(.*?)`", lines[i + 1])[0]
-                elif "### [+] SHA256 Output Hash:" in line and i + 1 < len(lines):
-                    if "`" in lines[i + 1]:
-                        sha = re.findall(r"`(.*?)`", lines[i + 1])[0]
+                if "Command" in line:
+                    # Try to extract command from up to the next 3 lines after the header
+                    for offset in range(1, 4):
+                        if i + offset < len(lines):
+                            content_line = lines[i + offset].strip()
+                            matches = re.findall(r"`(.*?)`", content_line)
+                            if matches:
+                                cmd = matches[0]
+                                break
+                    if cmd == "*Unknown*":
+                        logger.warning(
+                            f"[report] No valid command found after 'Command:' in {log_file.name} (line {i})")
+
+                elif "### [+] SHA256 Output Hash:" in line:
+                    # Try to extract hash from up to the next 3 lines after the hash header
+                    for offset in range(1, 4):
+                        if i + offset < len(lines):
+                            content_line = lines[i + offset].strip()
+                            matches = re.findall(r"`(.*?)`", content_line)
+                            if matches:
+                                sha = matches[0]
+                                break
+                    if sha == "*Not found*":
+                        logger.warning(
+                            f"[report] No SHA256 hash found after 'SHA256 Output Hash' in {log_file.name} (line {i})")
 
             output_lines = extract_block(lines, "### [+] Output")
             output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
