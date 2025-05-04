@@ -28,7 +28,7 @@ dependencies = [
 Homepage = "https://github.com/mev0lent/forensic-log-tracker"
 
 [project.scripts]
-flt = "cli:app"
+flt = "forensic_log_tracker.cli:app"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -36,4 +36,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["utils", "core", "config"]
+include = ["utils", "core", "config", "forensic_log_tracker"]

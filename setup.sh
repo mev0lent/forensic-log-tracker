@@ -40,7 +40,7 @@ source "$repo_path/forensic-log-venv/bin/activate"
 # Upgrade pip and install project dependencies
 echo "[+] Installing project dependencies using pyproject.toml..."
 pip install --upgrade pip
-pip install .
+pip install -e .
 
 # Decide which shell RC file to use
 shell_rc="$HOME/.bashrc"

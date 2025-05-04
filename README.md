@@ -22,13 +22,46 @@
 
 ### Requirements
 
-- Linux (tested on Kali)
+- Linux (tested on Kali) or Windows
 - Python 3.9+
 - GPG (GNU Privacy Guard)
 
----
+### Installation
 
-Absolutely — here's the **clean, modernized, and updated `README.md` setup block** that reflects your current project setup with helpful comments and fallback support for `requirements.txt`:
+#### Linux
+
+```bash
+# Clone the repository
+git clone https://github.com/mev0lent/forensic-log-tracker.git
+cd forensic-log-tracker
+
+# Run the setup script
+./setup.sh
+
+# Source your shell configuration to load the alias
+source ~/.bashrc  # or ~/.zshrc if using zsh
+
+# Activate the virtual environment
+source forensic-log-venv/bin/activate
+```
+
+#### Windows
+
+```powershell
+# Clone the repository
+git clone https://github.com/mev0lent/forensic-log-tracker.git
+cd forensic-log-tracker
+
+# Run the setup script (you may need to set execution policy)
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\setup.ps1
+
+# Restart PowerShell or reload your profile
+. $PROFILE
+
+# Activate the virtual environment
+.\forensic-log-venv\Scripts\Activate.ps1
+```
 
 ---
 
