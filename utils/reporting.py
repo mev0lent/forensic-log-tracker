@@ -130,9 +130,13 @@ def generate_report(case, verify=True):
                     for offset in range(1, 4):
                         if i + offset < len(lines):
                             content_line = lines[i + offset].strip()
-                            matches = re.findall(r"`(.*?)`", content_line)
-                            if matches:
-                                cmd = matches[0]
+                            if "`" in content_line:
+                                matches = re.findall(r"`(.*?)`", content_line)
+                                if matches:
+                                    cmd = matches[0]
+                                    break
+                            elif content_line:  # Fallback: take plain line if not empty
+                                cmd = content_line
                                 break
                     if cmd == "*Unknown*":
                         logger.warning(
