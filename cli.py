@@ -59,6 +59,9 @@ def run(
 
     if output:
         print(f"\n[+] Command Output:\n{output}")
+    
+    # Explicitly exit to prevent hanging
+    raise typer.Exit(code=0)
 
 @app.command()
 def analyze(case: str = typer.Option(..., "--case", "-c", help="Case ID")):
