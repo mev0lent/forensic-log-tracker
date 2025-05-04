@@ -1,5 +1,6 @@
 # core/executor.py
 import subprocess
+import platform
 from datetime import datetime, timezone
 from pathlib import Path
 import yaml
@@ -16,6 +17,7 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
     from datetime import datetime
     from pathlib import Path
     import subprocess
+    import platform
 
     timestamp = datetime.now(config["TIMEZONE"]).isoformat()
     case_dir = get_case_log_path(case, create=False)
@@ -26,12 +28,23 @@ def execute_command(cmd: str, case: str, dry_run: bool = False):
         output = "[!] DRY RUN: Command not executed."
     else:
         try:
-            result = subprocess.run(
-                ["bash", "-i", "-c", cmd],
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            # Check if we're on Windows or Linux
+            if platform.system() == "Windows":
+                # Use PowerShell on Windows
+                result = subprocess.run(
+                    ["powershell", "-Command", cmd],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+            else:
+                # Use bash on Linux/Unix, without the -i flag to avoid interactive mode
+                result = subprocess.run(
+                    ["bash", "-c", cmd],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
             output = f"[STDOUT]\n{result.stdout}\n[STDERR]\n{result.stderr}"
         except subprocess.CalledProcessError as e:
             output = f"[!] Command failed:\n{e.stderr}"
