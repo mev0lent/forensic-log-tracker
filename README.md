@@ -35,7 +35,11 @@
 git clone https://github.com/mev0lent/forensic-log-tracker.git
 cd forensic-log-tracker
 
+#adjust permissions
+chmod +x setup.sh
+
 # Run the setup script
+
 ./setup.sh
 
 # Source your shell configuration to load the alias
