@@ -7,14 +7,82 @@ strings:
 
 dd:
   default: >
-    `dd` was used to create a 1:1 copy of a disk. It is typically used in read-only mode and does not alter the original data. 
-    A legally permissible method for acquiring digital evidence.
+    `dd` is a standard tool for low-level data copying. It operates on bytes and sectors,
+    and is frequently used in digital forensics for making bit-exact disk images.
   if: >
-    The `if=` option specifies the input file (e.g., a disk device like `/dev/sda`).
+    The `if=` option specifies the input file or device (e.g., `/dev/sda`).
   of: >
-    The `of=` option specifies the output file (e.g., a disk image).
+    The `of=` option specifies the output file where the data will be written (e.g., `disk.img`).
   bs: >
-    The `bs=` option sets the block size for read/write operations. It affects speed and granularity of the copy process.
+    The `bs=` option sets the block size for reading and writing. It influences performance and granularity.
+  conv=sync: >
+    Fills blocks with zeros if there are read errors, ensuring even block sizes.
+    Useful for consistent image sizes in forensic imaging.
+  conv=noerror: >
+    Instructs `dd` to continue operation despite read errors.
+    Critical in cases of damaged media or partial evidence recovery.
+  conv=notrunc: >
+    Prevents truncation of the output file if it already exists.
+    Helps maintain data integrity during repeated writes.
+
+dc3dd:
+  default: >
+    `dc3dd` is an enhanced version of `dd` with forensic features such as hashing, logging, and progress display.
+    It is often used in professional evidence acquisition scenarios.
+  hash: >
+    Specifies the hash algorithm (e.g., `md5`, `sha256`) to calculate during imaging for integrity verification.
+  log: >
+    Defines a log file that records the imaging process and metadata.
+  hashlog: >
+    Outputs computed hash values into a separate file for verification purposes.
+  progress: >
+    When set to `on`, it enables a real-time progress display.
+
+dcfldd:
+  default: >
+    `dcfldd` is another `dd` variant used in forensics. It supports multiple outputs, hashing, and image splitting.
+  hash: >
+    Enables hashing during the imaging process using the specified algorithm.
+  hashlog: >
+    Outputs hash values into a file for audit and verification.
+  split: >
+    Splits the output file into parts of specified size — useful for large image handling.
+  of2: >
+    Writes output simultaneously to a secondary file — often used for redundancy.
+
+SquashFS:
+  default: >
+    `SquashFS` is a compressed, read-only filesystem ideal for distribution of forensic environments or system snapshots.
+  -comp: >
+    Specifies the compression algorithm to use (e.g., `xz`, `gzip`, `lzo`).
+  -e: >
+    Excludes files or directories from the resulting image.
+  -info: >
+    Displays metadata and structure information about a squashfs image.
+
+wxHexEditor:
+  default: >
+    `wxHexEditor` is a powerful cross-platform hex editor capable of handling large binary files efficiently.
+    It is used for manual binary inspection in forensic investigations.
+  -h: >
+    Displays help information for usage.
+  -v: >
+    Shows the current version of the tool.
+
+exiftool:
+  default: >
+    `exiftool` is a platform-independent Perl-based command-line tool for reading, writing, and editing metadata.
+    It supports a wide range of file formats used in forensic multimedia analysis.
+  -a: >
+    Displays all metadata tags, including duplicate tags.
+  -G: >
+    Shows the group names for each metadata tag.
+  -s: >
+    Shows short tag names.
+  -r: >
+    Recursively processes directories.
+  -overwrite_original: >
+    Overwrites the original file without saving a backup.
 
 ls:
   default: >
@@ -36,20 +104,60 @@ md5sum:
   --tag: >
     Outputs in a tagged format compatible with standard verification tools.
 
-unzip:
+fdisk:
   default: >
-    `unzip` extracts a ZIP archive. Since it changes data on the destination system, it should only be used in **virtual analysis environments** or on forensic clones.
-  -d: >
-    The `-d` option specifies the destination directory for extracted files. Useful to keep extracted data organized.
+    `fdisk` is an interactive command-line tool to create, delete, and manage partitions on storage devices.
+  -l: >
+    Lists partition tables of all recognized devices.
+  -s: >
+    Displays the size of a given partition.
 
 mmls:
   default: >
     `mmls` analyzes the partition layout of a disk image without modifying it. 
     It shows partitions, offsets, and sizes — a typical forensic step before mounting.
   -t: >
-    The `-t` option specifies the partition table type (e.g., DOS, GPT).
+    Specifies the partition table type (e.g., `dos`, `gpt`).
+  -o: >
+    Sets the offset where the partition starts in sectors.
+  -i: >
+    Sets the image format type (e.g., `raw`, `split`).
   -b: >
-    The `-b` option specifies the block size of the image. This ensures correct offset calculation.
+    Specifies the sector size in bytes for proper alignment.
+
+unzip:
+  default: >
+    `unzip` extracts a ZIP archive. Since it changes data on the destination system, it should only be used in **virtual analysis environments** or on forensic clones.
+  -d: >
+    The `-d` option specifies the destination directory for extracted files. Useful to keep extracted data organized.
+
+crunch:
+  default: >
+    `crunch` is used to generate custom wordlists based on specified patterns and character sets.
+    It is useful in password recovery scenarios during forensic investigations.
+  -t: >
+    Sets a pattern for password generation (e.g., `@@%%%@@`).
+  -o: >
+    Sets the output file for the generated wordlist.
+  -b: >
+    Limits the output file size (e.g., `20mb`) to manage disk usage.
+
+hashcat:
+  default: >
+    `hashcat` is a powerful password-cracking tool that supports various attack modes and hash algorithms.
+    It is widely used in password recovery, forensic validation, and penetration testing.
+  -m: >
+    The `-m` option specifies the hash type (e.g., 0 for MD5, 1000 for NTLM).
+    Choosing the correct mode ensures accurate hash interpretation.
+  -a: >
+    The `-a` option defines the attack mode (e.g., 0 for dictionary, 3 for mask attack).
+    This controls how passwords are generated and tested.
+  --force: >
+    Forces execution even if hardware warnings occur.
+    This should be used cautiously in forensic environments.
+  -o: >
+    The `-o` option sets the output file where cracked passwords are written.
+    Useful for documentation and evidence retention.
 
 mkdir:
   default: >
@@ -91,7 +199,237 @@ touch:
 
 shasum:
   default: >
-    `shasum` generates SHA hash values (SHA-1 by default unless specified). It is used to verify file integrity. In forensic contexts, it is recommended to specify stronger hashes like SHA-256.
+    `shasum` computes and verifies SHA checksums for file integrity.
+    It is frequently used in digital forensics to ensure authenticity of evidence.
   -a: >
-    The `-a` option allows selection of the SHA variant (e.g., 1, 256, 512). Always use SHA-256 or higher for forensics.
+    Specifies the SHA algorithm (e.g., 1, 256, 512).
+  -c: >
+    Verifies checksums against a known hash file.
+
+fls:
+  default: >
+    `fls` lists files and directories from a filesystem image, including deleted entries.
+    It is crucial for recovering and analyzing file system metadata in forensic investigations.
+  -r: >
+    Enables recursive listing of directory contents.
+  -m: >
+    Adds a base path prefix to file paths (e.g., `/mnt/image`).
+  -o: >
+    Sets the starting sector offset of the partition.
+  -p: >
+    Displays full path information (usually used with `-r`).
+  -d: >
+    Shows only deleted files.
+  -f: >
+    Specifies the file system type (e.g., `ntfs`, `ext4`, `fat`).
+
+icat:
+  default: >
+    `icat` extracts file content from a disk image based on inode number.
+    It is used to retrieve deleted or hidden data in forensic investigations.
+  -o: >
+    Sets the sector offset where the partition begins.
+  -f: >
+    Specifies the file system type (e.g., `ntfs`, `ext4`, `fat`).
+  -r: >
+    Reconstructs fragmented files.
+  -s: >
+    Sends the file content to standard output for redirection.
+  -i: >
+    Specifies the image type (e.g., `raw`, `ewf`).
+
+istat:
+  default: >
+    `istat` displays detailed metadata for a file identified by its inode number.
+    It helps correlate file system activity with forensic timelines.
+  -o: >
+    Sets the sector offset for the partition.
+  -f: >
+    Defines the file system type (e.g., `ntfs`, `ext4`, `fat`).
+  -i: >
+    Specifies the disk image format (e.g., `raw`, `ewf`).
+
+file:
+  default: >
+    `file` identifies file types by examining magic numbers and headers.
+    Useful for verifying or correcting file extensions and detecting anomalies.
+
+grep:
+  default: >
+    `grep` searches for patterns in text files.
+    In forensics, it helps extract relevant entries from logs, configs, or dumps.
+  -i: >
+    Performs a case-insensitive search.
+  -r: >
+    Recursively searches directories.
+  -E: >
+    Enables extended regular expressions.
+
+find:
+  default: >
+    `find` searches files in a directory hierarchy based on name, size, date, or permissions.
+    Essential for locating evidence or large/unusual files.
+  -name: >
+    Matches files by name or pattern.
+  -mtime: >
+    Finds files based on modification time.
+  -exec: >
+    Executes a command on each found item — powerful but potentially destructive.
+
+tar:
+  default: >
+    `tar` is used to create and extract archive files.
+    In forensics, it’s useful for packaging or reviewing archived evidence sets.
+  -x: >
+    Extracts files from an archive.
+  -f: >
+    Specifies the archive file to use.
+  -v: >
+    Enables verbose output, showing processed files.
+
+hexdump:
+  default: >
+    `hexdump` displays file content in hexadecimal and ASCII.
+    Useful for examining file headers, signatures, and patterns.
+
+stat:
+  default: >
+    `stat` shows detailed file metadata including access/modification/change timestamps.
+    Important for timeline reconstruction in forensic cases.
+
+ps:
+  default: >
+    `ps` displays currently running processes.
+    Often used in triage to detect anomalies or unauthorized programs.
+  -ef: >
+    Shows a full-format listing of all processes.
+
+ss:
+  default: >
+    `ss` is a modern replacement for `netstat` for socket statistics.
+    Often used for faster inspection of open network connections.
+  -lntp: >
+    Shows listening ports with associated process info.
+
+history:
+  default: >
+    `history` displays the command history of the current shell user.
+    Can reveal attacker activity or user behavior.
+    
+autopsy:
+  default: >
+    `autopsy` is a digital forensics platform and graphical interface to The Sleuth Kit and other digital forensics tools. It is used by law enforcement, military, and corporate examiners to investigate what happened on a computer. It can recover deleted files, analyze file systems, and manage cases.
+  -d: >
+    Specifies the evidence locker directory.
+  -p: >
+    Sets the port number for the Autopsy server (default is 9999).
+  -i: >
+    Provides the evidence locker directory.
+  -c: >
+    Forces a cookie in the URL.
+  -C: >
+    Disallows cookies in the URL.
+
+awk:
+  default: >
+    `awk` is a powerful text-processing language used for pattern scanning and processing. It is commonly used for data extraction and reporting.
+  -F: >
+    Sets the field separator character.
+  -v: >
+    Assigns a variable before execution begins.
+  -f: >
+    Reads the awk program from a file.
+
+basename:
+  default: >
+    `basename` strips directory and suffix from file names, returning only the file name component. Useful in scripts for extracting file names from paths.
+
+cal:
+  default: >
+    `cal` displays a calendar in the terminal. By default, it shows the current month's calendar.
+  -y: >
+    Displays the calendar for the current year.
+  -m: >
+    Specifies the month to display.
+  -3: >
+    Displays the previous, current, and next month.
+
+cat:
+  default: >
+    `cat` concatenates and displays the content of files. It is commonly used to view file contents or combine multiple files.
+  -n: >
+    Numbers all output lines.
+  -b: >
+    Numbers non-empty output lines.
+  -s: >
+    Squeezes multiple adjacent blank lines.
+
+cd:
+  default: >
+    `cd` changes the current directory in the shell. It is used to navigate between directories.
+
+chmod:
+  default: >
+    `chmod` changes the file mode (permissions) of files and directories.
+  -R: >
+    Applies changes recursively to all files and directories.
+  -v: >
+    Outputs a diagnostic for every file processed.
+
+chown:
+  default: >
+    `chown` changes the ownership of files and directories.
+  -R: >
+    Applies changes recursively to all files and directories.
+  -v: >
+    Outputs a diagnostic for every file processed.
+
+clear:
+  default: >
+    `clear` clears the terminal screen, providing a clean workspace.
+
+cp:
+  default: >
+    `cp` copies files and directories.
+  -r: >
+    Copies directories recursively.
+  -i: >
+    Prompts before overwriting files.
+  -u: >
+    Copies only when the source file is newer than the destination file or when the destination file is missing.
+
+cron:
+  default: >
+    `cron` is a time-based job scheduler in Unix-like operating systems. It allows users to schedule jobs (commands or scripts) to run periodically at fixed times, dates, or intervals.
+
+crontab:
+  default: >
+    `crontab` installs, deinstalls, or lists the tables used to drive the cron daemon.
+  -l: >
+    Displays the current user's crontab.
+  -e: >
+    Edits the current user's crontab.
+  -r: >
+    Removes the current user's crontab.
+
+curl:
+  default: >
+    `curl` transfers data from or to a server using various protocols. It is widely used for downloading files or interacting with APIs.
+  -O: >
+    Saves the downloaded file with its original name.
+  -L: >
+    Follows redirects.
+  -I: >
+    Fetches the headers only.
+
+cut:
+  default: >
+    `cut` removes sections from each line of files. It is commonly used to extract specific columns or fields.
+  -d: >
+    Specifies the delimiter character.
+  -f: >
+    Specifies the fields to extract.
+  -c: >
+    Specifies the character positions to extract.
+
 
