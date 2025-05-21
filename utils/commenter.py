@@ -19,11 +19,11 @@ def write_comment(case: str, text: str) -> Path:
     comment_file = case_dir / f"{safe_time}_comment.log"
 
     analyst = config.get("project", {}).get("analyst", "Unknown Analyst")
-    comment_type = config.get("output", {}).get("Callout", "Comment")
+    comment_type = config.get("output", {}).get("comment_type", "Comment")
 
     if comment_type == "Callout":
         content = [
-            f">[!Info] Kommentar von: {analyst}",
+            f">[!Info] Comment from: {analyst}",
             f"> {text}"
         ]
     else:
