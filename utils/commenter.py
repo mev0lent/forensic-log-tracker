@@ -25,7 +25,8 @@ def write_comment(case: str, text: str) -> Path:
         content = [
             "",
             f">[!Info] Comment from analyst: {analyst}",
-            f"> {text}"
+            f"> {text}",
+            ""
         ]
     else:
         content = [
