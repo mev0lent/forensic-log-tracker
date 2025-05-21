@@ -23,7 +23,8 @@ def write_comment(case: str, text: str) -> Path:
 
     if comment_type == "Callout":
         content = [
-            f">[!Info] Comment from: {analyst}",
+            "",
+            f">[!Info] Comment from analyst: {analyst}",
             f"> {text}"
         ]
     else:
