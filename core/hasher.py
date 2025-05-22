@@ -1,5 +1,6 @@
-#core/hasher.py# core/hasher.py
+# core/hasher.py# core/hasher.py
 import hashlib
+
 
 def compute_hash(data: str, algorithm: str = "sha256") -> str:
     """
