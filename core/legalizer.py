@@ -58,8 +58,9 @@ def get_legal_explanation(tool: str) -> str:
         )
 
     return template.render(
-        tool=tool,
-        explanation=explanation_text,
+        tool=tool.strip(),
+        explanation=explanation_text.strip(),
         analyst=config["project"]["analyst"],
         timestamp=datetime.now(config["TIMEZONE"]).isoformat()
-    )
+    ).strip()
+
