@@ -31,13 +31,13 @@ def get_legal_explanation(tool: str) -> str:
     if used_sudo:
         parts = parts[1:]  # remove sudo
 
-    command = parts[0]
+    command = parts[0].lower()
     args = parts[1:]
 
     parser = PARSERS.get(command)
     flags = parser(args) if parser else args
 
-    cmd_entry = explanations.get(command, None)
+    cmd_entry = explanations.get(command.lower(), None)
     if not cmd_entry:
         print(f"[x] No explanation for '{command}' found – please extend explanations.yaml.")
         explanation_text = "[x] No specific explanation found."
@@ -49,7 +49,7 @@ def get_legal_explanation(tool: str) -> str:
             for flag in flags:
                 # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
                 explanation_text += "\n\n" + cmd_entry.get(flag, "")
-
+    explanation_text += f"[+] This was the origincal command: {command.lower()}"
     # Add sudo note if necessary
     if used_sudo:
         explanation_text = (
