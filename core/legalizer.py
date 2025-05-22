@@ -10,6 +10,7 @@ from utils.pathing import get_template_path, get_config_path
 
 config = load_config()
 
+
 def get_legal_explanation(tool: str) -> str:
     with get_config_path("explanations.yaml").open("r", encoding="utf-8") as f:
         explanations = yaml.safe_load(f)
@@ -53,8 +54,8 @@ def get_legal_explanation(tool: str) -> str:
     # Add sudo note if necessary
     if used_sudo:
         explanation_text = (
-            "**[!] Note:** This command was executed with administrative rights (`sudo`).\n"
-            + explanation_text
+                "**[!] Note:** This command was executed with administrative rights (`sudo`).\n"
+                + explanation_text
         )
 
     return template.render(
@@ -63,4 +64,3 @@ def get_legal_explanation(tool: str) -> str:
         analyst=config["project"]["analyst"],
         timestamp=datetime.now(config["TIMEZONE"]).isoformat()
     ).strip()
-
