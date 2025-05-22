@@ -12,6 +12,7 @@ output:
   preview_lines: 20
   include_sha256: true
   hash_algorithm: "sha256"
+  comment_type: "Comment"               # "Callout" oder "Comment"
 
 gpg:
   enabled: true
