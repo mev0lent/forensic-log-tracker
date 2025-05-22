@@ -54,13 +54,13 @@ def extract_block(lines, label="Output excerpt"):
         # Find first triple backtick line after label
         start_block = next(
             i for i in range(start, len(lines))
-            if lines[i].strip().startswith("```")
+            if lines[i].strip().startswith("~~~")
         )
 
         # Find matching closing backtick block
         end_block = next(
             i for i in range(start_block + 1, len(lines))
-            if lines[i].strip().startswith("```")
+            if lines[i].strip().startswith("~~~")
         )
 
         return "\n".join(lines[start_block + 1:end_block]).strip()
