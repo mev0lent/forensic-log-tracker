@@ -2,6 +2,7 @@ import pytest
 from pathlib import Path
 from utils.commenter import write_comment
 
+
 @pytest.fixture
 def setup_test_environment(monkeypatch, tmp_path):
     tmp_case_dir = tmp_path / "case123"
@@ -21,6 +22,7 @@ def setup_test_environment(monkeypatch, tmp_path):
 
     return tmp_case_dir
 
+
 def test_write_callout(setup_test_environment):
     comment_file = write_comment("case123", "Dies ist ein Testkommentar.")
     assert comment_file.exists()
@@ -28,6 +30,7 @@ def test_write_callout(setup_test_environment):
     content = comment_file.read_text()
     assert ">[!Info] Comment from analyst: Max Mustermann" in content
     assert "> Dies ist ein Testkommentar." in content
+
 
 def test_write_comment(monkeypatch, tmp_path):
     tmp_case_dir = tmp_path / "case456"

@@ -220,6 +220,25 @@ gpg --verify path/to/repo/logs/case001/logfile.log.sig
 ```
 
 ---
+## Dockerized Testing
+
+### Build and Test
+
+#### For manual execution
+```bash
+make build
+make test
+```
+
+### For immediate execution
+```bash
+make run_test
+```
+
+### For cleaning/removing container
+```bash
+make clean
+---
 
 ## .gitignore tip
 
@@ -232,6 +251,7 @@ logs/
 .env/
 __pycache__/
 log-tracker-env/
+pipfile
 ```
 
 To protect private evidence logs and signatures.
