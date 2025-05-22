@@ -49,6 +49,8 @@ dcfldd:
     Splits the output file into parts of specified size — useful for large image handling.
   of2: >
     Writes output simultaneously to a secondary file — often used for redundancy.
+  errlog: >
+    The `errlog` option saves error messages into a log file, useful for later review or documentation.
 
 SquashFS:
   default: >
@@ -364,10 +366,6 @@ cat:
   -s: >
     Squeezes multiple adjacent blank lines.
 
-cd:
-  default: >
-    `cd` changes the current directory in the shell. It is used to navigate between directories.
-
 chmod:
   default: >
     `chmod` changes the file mode (permissions) of files and directories.
@@ -432,4 +430,6 @@ cut:
   -c: >
     Specifies the character positions to extract.
 
-
+xxd:
+  default: >
+    The `xxd` command creates a hexadecimal dump of a given file. This is useful for inspecting raw data structures or headers.

@@ -371,6 +371,12 @@ def parse_wxhexeditor(args):
     # GUI tool, rarely invoked with CLI flags
     return []
 
+def parse_xxd(args):
+    parser = argparse.ArgumentParser(prog="xxd", add_help=False)
+    parser.add_argument("-r", action="store_true")
+    parsed, _ = parser.parse_known_args(args)
+    return ["-r"] if parsed.r else []
+
 PARSERS = {
     "mount": parse_mount_extended,
     "losetup": parse_losetup,
@@ -418,5 +424,6 @@ PARSERS = {
     "stat": parse_stat,
     "tar": parse_tar,
     "wxHexEditor": parse_wxhexeditor,
+    "xxd": parse_xxd
 }
 
