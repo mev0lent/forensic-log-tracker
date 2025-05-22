@@ -49,6 +49,8 @@ dcfldd:
     Splits the output file into parts of specified size — useful for large image handling.
   of2: >
     Writes output simultaneously to a secondary file — often used for redundancy.
+  errlog: >
+    The `errlog` option saves error messages into a log file, useful for later review or documentation.
 
 SquashFS:
   default: >
@@ -364,10 +366,6 @@ cat:
   -s: >
     Squeezes multiple adjacent blank lines.
 
-cd:
-  default: >
-    `cd` changes the current directory in the shell. It is used to navigate between directories.
-
 chmod:
   default: >
     `chmod` changes the file mode (permissions) of files and directories.
@@ -432,4 +430,46 @@ cut:
   -c: >
     Specifies the character positions to extract.
 
+xxd:
+  default: >
+    The `xxd` command creates a hexadecimal dump of a given file. This is useful for inspecting raw data structures or headers.
 
+sha256sum:
+  default: |
+    The `sha256sum` command calculates a SHA-256 cryptographic hash of a file.
+  -c: |
+    Checks the SHA-256 hash against a provided list.
+  --tag: |
+    Outputs the hash in a BSD-style format.
+
+7z:
+  default: |
+    `7z` is a file archiver with high compression. Common uses include extracting or adding files.
+  x: |
+    Extracts with full paths.
+  a: |
+    Adds files to an archive.
+  t: |
+    Tests archive integrity.
+
+lsblk:
+  default: |
+    The `lsblk` command lists information about block devices.
+  -f: |
+    Displays filesystem information.
+  -o: |
+    Specifies custom output columns.
+
+fsstat:
+  default: |
+    The `fsstat` tool from SleuthKit displays file system details such as layout and timestamps.
+  -t: |
+    Shows time zone information for the file system.
+
+error:
+  default: |
+    This does not appear to be a valid command. It may be the result of a misinterpreted log line or a failed execution attempt.
+
+invalid:
+  default: |
+    This entry likely stems from an invalid or malformed command. It should be reviewed for correctness.
