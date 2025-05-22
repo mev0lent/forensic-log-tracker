@@ -27,6 +27,10 @@ def get_legal_explanation(tool: str) -> str:
         return "[x] Legal explanation rendering failed."
 
     parts = tool.strip().split()
+    used_sudo = parts[0] == "sudo"
+    if used_sudo:
+        parts = parts[1:]  # remove sudo
+
     command = parts[0]
     args = parts[1:]
 
@@ -45,6 +49,13 @@ def get_legal_explanation(tool: str) -> str:
             for flag in flags:
                 # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
                 explanation_text += "\n\n" + cmd_entry.get(flag, "")
+
+    # Add sudo note if necessary
+    if used_sudo:
+        explanation_text = (
+            "**[!] Note:** This command was executed with administrative rights (`sudo`).\n"
+            + explanation_text
+        )
 
     return template.render(
         tool=tool,
