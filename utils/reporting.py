@@ -157,7 +157,8 @@ def generate_report(case, verify=True):
 
             output_lines = extract_block(lines, "### [+] Output")
             output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
-            explanation = extract_explanation(lines)
+            from core.legalizer import get_legal_explanation
+            explanation = get_legal_explanation(cmd)
 
             sig_status = "[!] Not Signed"
             if verify and sig_file.exists():

@@ -27,13 +27,17 @@ def get_legal_explanation(tool: str) -> str:
         return "[x] Legal explanation rendering failed."
 
     parts = tool.strip().split()
-    command = parts[0]
+    used_sudo = parts[0] == "sudo"
+    if used_sudo:
+        parts = parts[1:]  # remove sudo
+
+    command = parts[0].lower()
     args = parts[1:]
 
     parser = PARSERS.get(command)
     flags = parser(args) if parser else args
 
-    cmd_entry = explanations.get(command, None)
+    cmd_entry = explanations.get(command.lower(), None)
     if not cmd_entry:
         print(f"[x] No explanation for '{command}' found – please extend explanations.yaml.")
         explanation_text = "[x] No specific explanation found."
@@ -46,9 +50,17 @@ def get_legal_explanation(tool: str) -> str:
                 # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
                 explanation_text += "\n\n" + cmd_entry.get(flag, "")
 
+    # Add sudo note if necessary
+    if used_sudo:
+        explanation_text = (
+            "**[!] Note:** This command was executed with administrative rights (`sudo`).\n"
+            + explanation_text
+        )
+
     return template.render(
-        tool=tool,
-        explanation=explanation_text,
+        tool=tool.strip(),
+        explanation=explanation_text.strip(),
         analyst=config["project"]["analyst"],
         timestamp=datetime.now(config["TIMEZONE"]).isoformat()
-    )
+    ).strip()
+

@@ -371,6 +371,45 @@ def parse_wxhexeditor(args):
     # GUI tool, rarely invoked with CLI flags
     return []
 
+def parse_xxd(args):
+    parser = argparse.ArgumentParser(prog="xxd", add_help=False)
+    parser.add_argument("-r", action="store_true")
+    parsed, _ = parser.parse_known_args(args)
+    return ["-r"] if parsed.r else []
+
+def parse_sha256sum(args):
+    parser = argparse.ArgumentParser(prog="sha256sum", add_help=False)
+    parser.add_argument("-c", dest="check", action="store_true")
+    parser.add_argument("--tag", action="store_true")
+    parsed, _ = parser.parse_known_args(args)
+    flags = []
+    if parsed.check: flags.append("-c")
+    if parsed.tag: flags.append("--tag")
+    return flags
+
+def parse_7z(args):
+    # 7z supports lots of flags, here's a simple baseline
+    parser = argparse.ArgumentParser(prog="7z", add_help=False)
+    parser.add_argument("mode", nargs="?", default=None)  # e.g. "x", "a", "t"
+    parsed, _ = parser.parse_known_args(args)
+    return [parsed.mode] if parsed.mode else []
+
+def parse_lsblk(args):
+    parser = argparse.ArgumentParser(prog="lsblk", add_help=False)
+    parser.add_argument("-f", action="store_true")
+    parser.add_argument("-o", dest="columns", type=str)
+    parsed, _ = parser.parse_known_args(args)
+    flags = []
+    if parsed.f: flags.append("-f")
+    if parsed.columns: flags.append("-o")
+    return flags
+
+def parse_fsstat(args):
+    parser = argparse.ArgumentParser(prog="fsstat", add_help=False)
+    parser.add_argument("-t", action="store_true")
+    parsed, _ = parser.parse_known_args(args)
+    return ["-t"] if parsed.t else []
+
 PARSERS = {
     "mount": parse_mount_extended,
     "losetup": parse_losetup,
@@ -418,5 +457,10 @@ PARSERS = {
     "stat": parse_stat,
     "tar": parse_tar,
     "wxHexEditor": parse_wxhexeditor,
+    "xxd": parse_xxd,
+    "sha256sum": parse_sha256sum,
+    "7z": parse_7z,
+    "lsblk": parse_lsblk,
+    "fsstat": parse_fsstat,
 }
 
