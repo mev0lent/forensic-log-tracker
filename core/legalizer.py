@@ -49,7 +49,7 @@ def get_legal_explanation(tool: str) -> str:
             for flag in flags:
                 # z. B. bei "mount -o ro" → findet Erklärung zu -o und ro
                 explanation_text += "\n\n" + cmd_entry.get(flag, "")
-    explanation_text += f"[+] This was the origincal command: {command.lower()}"
+
     # Add sudo note if necessary
     if used_sudo:
         explanation_text = (
