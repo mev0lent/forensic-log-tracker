@@ -1,0 +1,11 @@
+
+### TO DO (+ hinzugefügt | - noch nicht hinzugefügt)
+
++ sudo before commands, messes up explanations
+- remove Befehl
+- automatic workflow command
+- Zeitstrahl command
+- Flag für Comment command
+- Shell für Codeblock
+- Jinja Template updaten
+- --help erweitern mit typer
