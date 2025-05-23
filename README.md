@@ -75,7 +75,6 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 - Optionally helps you generate a GPG key
 - Leaves your system environment untouched
 
-
 ### 📦 Alternative setup: `requirements.txt` still available
 
 While we recommend using the `pyproject.toml`-based approach for reproducibility and clean isolation, we’ve left a `requirements.txt` in the repo for convenience.  
