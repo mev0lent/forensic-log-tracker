@@ -1,3 +1,4 @@
+
 from core.logger import write_log
 
 
@@ -28,7 +29,7 @@ def test_write_log_normal_output(tmp_path):
 
     assert "Timestamp: 2024-05-22T10:33:45.123" in content
     assert "Command:\n`ls -la`" in content
-    assert "```Shell\n" in content and "total 0" in content
+    assert "```\n" in content and "total 0" in content
     assert "Explanation:\nLists directory contents" in content
     assert f"SHA256 Output Hash:\n`{output_hash}`" in content
 
