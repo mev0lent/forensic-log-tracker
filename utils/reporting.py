@@ -174,7 +174,7 @@ def generate_report(case, verify=True):
             report_lines.append(f"- Timestamp: `{timestamp}`")
             report_lines.append(f"- GPG-signature: {sig_status}")
             report_lines.append(f"- SHA256: `{sha}`\n")
-            report_lines.append(f"#### Output:\n```\n{output_excerpt}\n```\n")
+            report_lines.append(f"#### Output:\n```Shell\n{output_excerpt}\n```\n")
 
             if "[DRY RUN]" in output_excerpt:
                 report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")

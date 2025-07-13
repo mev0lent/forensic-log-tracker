@@ -75,7 +75,6 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 - Optionally helps you generate a GPG key
 - Leaves your system environment untouched
 
-
 ### 📦 Alternative setup: `requirements.txt` still available
 
 While we recommend using the `pyproject.toml`-based approach for reproducibility and clean isolation, we’ve left a `requirements.txt` in the repo for convenience.  
@@ -220,6 +219,25 @@ gpg --verify path/to/repo/logs/case001/logfile.log.sig
 ```
 
 ---
+## Dockerized Testing
+
+### Build and Test
+
+#### For manual execution
+```bash
+make build
+make test
+```
+
+### For immediate execution
+```bash
+make run_test
+```
+
+### For cleaning/removing container
+```bash
+make clean
+---
 
 ## .gitignore tip
 
@@ -232,6 +250,7 @@ logs/
 .env/
 __pycache__/
 log-tracker-env/
+pipfile
 ```
 
 To protect private evidence logs and signatures.

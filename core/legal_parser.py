@@ -1,11 +1,13 @@
 # core/legal_parser.py
 import argparse
 
+
 def parse_mount(args):
     parser = argparse.ArgumentParser(prog="mount", add_help=False)
     parser.add_argument("-o", dest="o_flags", type=str, default="")
     parsed, _ = parser.parse_known_args(args)
     return ["-o"] + parsed.o_flags.split(",") if parsed.o_flags else []
+
 
 def parse_losetup(args):
     parser = argparse.ArgumentParser(prog="losetup", add_help=False)
@@ -20,11 +22,13 @@ def parse_losetup(args):
     if parsed.offset: flags.append("-o")
     return flags
 
+
 def parse_mkdir(args):
     parser = argparse.ArgumentParser(prog="mkdir", add_help=False)
     parser.add_argument("-p", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-p"] if parsed.p else []
+
 
 def parse_unzip(args):
     parser = argparse.ArgumentParser(prog="unzip", add_help=False)
@@ -32,16 +36,19 @@ def parse_unzip(args):
     parsed, _ = parser.parse_known_args(args)
     return ["-d"] if parsed.dir else []
 
+
 def parse_dd(args):
     # dd doesn’t use flags, just key=value
     flags = [a.split("=")[0] for a in args if "=" in a]
     return flags
+
 
 def parse_strings(args):
     parser = argparse.ArgumentParser(prog="strings", add_help=False)
     parser.add_argument("-n", dest="num", type=str)
     parsed, _ = parser.parse_known_args(args)
     return ["-n"] if parsed.num else []
+
 
 def parse_mmls(args):
     parser = argparse.ArgumentParser(prog="mmls", add_help=False)
@@ -54,14 +61,17 @@ def parse_mmls(args):
     if parsed.block: flags.append("-b")
     return flags
 
+
 def parse_touch(args):
     return []  # no meaningful flags for forensic impact
+
 
 def parse_shasum(args):
     parser = argparse.ArgumentParser(prog="shasum", add_help=False)
     parser.add_argument("-a", dest="algo", type=str)
     parsed, _ = parser.parse_known_args(args)
     return ["-a"] if parsed.algo else []
+
 
 def parse_mount_extended(args):
     flags = parse_mount(args)
@@ -72,6 +82,7 @@ def parse_mount_extended(args):
     if parsed.type:
         flags.append("-t")
     return flags
+
 
 def parse_md5sum(args):
     parser = argparse.ArgumentParser(prog="md5sum", add_help=False)
@@ -84,13 +95,16 @@ def parse_md5sum(args):
     if parsed.tag: flags.append("--tag")
     return flags
 
+
 def parse_squashfs(args):
     # Typically used as a file system, no CLI parser assumed
     return []
 
+
 def parse_autopsy(args):
     # GUI tool, typically launched without arguments
     return []
+
 
 def parse_awk(args):
     parser = argparse.ArgumentParser(prog="awk", add_help=False)
@@ -98,9 +112,11 @@ def parse_awk(args):
     parsed, _ = parser.parse_known_args(args)
     return ["-F"] if parsed.delimiter else []
 
+
 def parse_basename(args):
     # Usually no flags
     return []
+
 
 def parse_cal(args):
     parser = argparse.ArgumentParser(prog="cal", add_help=False)
@@ -108,15 +124,18 @@ def parse_cal(args):
     parsed, _ = parser.parse_known_args(args)
     return ["-m"] if parsed.m else []
 
+
 def parse_cat(args):
     parser = argparse.ArgumentParser(prog="cat", add_help=False)
     parser.add_argument("-n", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-n"] if parsed.n else []
 
+
 def parse_cd(args):
     # Shell built-in, no flags
     return []
+
 
 def parse_chmod(args):
     parser = argparse.ArgumentParser(prog="chmod", add_help=False)
@@ -124,14 +143,17 @@ def parse_chmod(args):
     parsed, _ = parser.parse_known_args(args)
     return ["-R"] if parsed.R else []
 
+
 def parse_chown(args):
     parser = argparse.ArgumentParser(prog="chown", add_help=False)
     parser.add_argument("-R", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-R"] if parsed.R else []
 
+
 def parse_clear(args):
     return []
+
 
 def parse_cp(args):
     parser = argparse.ArgumentParser(prog="cp", add_help=False)
@@ -144,9 +166,11 @@ def parse_cp(args):
     if parsed.p: flags.append("-p")
     return flags
 
+
 def parse_cron(args):
     # Not typically executed with flags; usually a daemon or system service
     return []
+
 
 def parse_crontab(args):
     parser = argparse.ArgumentParser(prog="crontab", add_help=False)
@@ -161,11 +185,13 @@ def parse_crontab(args):
     if parsed.e: flags.append("-e")
     return flags
 
+
 def parse_crunch(args):
     parser = argparse.ArgumentParser(prog="crunch", add_help=False)
     parser.add_argument("-t", dest="pattern", type=str)
     parsed, _ = parser.parse_known_args(args)
     return ["-t"] if parsed.pattern else []
+
 
 def parse_curl(args):
     parser = argparse.ArgumentParser(prog="curl", add_help=False)
@@ -182,6 +208,7 @@ def parse_curl(args):
     if parsed.I: flags.append("-I")
     return flags
 
+
 def parse_cut(args):
     parser = argparse.ArgumentParser(prog="cut", add_help=False)
     parser.add_argument("-d", dest="delimiter", type=str)
@@ -193,24 +220,29 @@ def parse_cut(args):
     if parsed.fields: flags.append("-f")
     return flags
 
+
 def parse_dc3dd(args):
     # dc3dd accepts similar flags to dd; just return key=value flags
     return [a.split("=")[0] for a in args if "=" in a]
 
+
 def parse_dcfldd(args):
     # Similar to dc3dd
     return [a.split("=")[0] for a in args if "=" in a]
+
 
 def parse_exiftool(args):
     # Many flags possible, but -all and -filename are common
     flags = [arg for arg in args if arg.startswith("-")]
     return flags
 
+
 def parse_fdisk(args):
     parser = argparse.ArgumentParser(prog="fdisk", add_help=False)
     parser.add_argument("-l", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-l"] if parsed.l else []
+
 
 def parse_file(args):
     # file -i (MIME type) and -b (brief) are most common
@@ -223,6 +255,7 @@ def parse_file(args):
     if parsed.i: flags.append("-i")
     if parsed.b: flags.append("-b")
     return flags
+
 
 def parse_find(args):
     parser = argparse.ArgumentParser(prog="find", add_help=False)
@@ -237,6 +270,7 @@ def parse_find(args):
     if parsed.exec: flags.append("-exec")
     return flags
 
+
 def parse_fls(args):
     parser = argparse.ArgumentParser(prog="fls", add_help=False)
     parser.add_argument("-r", action="store_true")
@@ -247,6 +281,7 @@ def parse_fls(args):
     if parsed.r: flags.append("-r")
     if parsed.meta: flags.append("-m")
     return flags
+
 
 def parse_grep(args):
     parser = argparse.ArgumentParser(prog="grep", add_help=False)
@@ -263,6 +298,7 @@ def parse_grep(args):
     if parsed.after: flags.append("-A")
     return flags
 
+
 def parse_hashcat(args):
     parser = argparse.ArgumentParser(prog="hashcat", add_help=False)
     parser.add_argument("-m", dest="mode", type=str)
@@ -276,15 +312,18 @@ def parse_hashcat(args):
     if parsed.force: flags.append("--force")
     return flags
 
+
 def parse_hexdump(args):
     parser = argparse.ArgumentParser(prog="hexdump", add_help=False)
     parser.add_argument("-C", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-C"] if parsed.C else []
 
+
 def parse_history(args):
     # shell builtin, often no flags
     return []
+
 
 def parse_icat(args):
     parser = argparse.ArgumentParser(prog="icat", add_help=False)
@@ -292,9 +331,11 @@ def parse_icat(args):
     parsed, _ = parser.parse_known_args(args)
     return ["-r"] if parsed.r else []
 
+
 def parse_istat(args):
     # typically no flags, just image + inode
     return []
+
 
 def parse_ls(args):
     parser = argparse.ArgumentParser(prog="ls", add_help=False)
@@ -309,6 +350,7 @@ def parse_ls(args):
     if parsed.h: flags.append("-h")
     return flags
 
+
 def parse_ps(args):
     parser = argparse.ArgumentParser(prog="ps", add_help=False)
     parser.add_argument("aux", nargs="?", default=None)
@@ -322,6 +364,7 @@ def parse_ps(args):
     if parsed.f: flags.append("-f")
     return flags
 
+
 def parse_sha1sum(args):
     parser = argparse.ArgumentParser(prog="sha1sum", add_help=False)
     parser.add_argument("-c", dest="check", action="store_true")
@@ -332,6 +375,7 @@ def parse_sha1sum(args):
     if parsed.check: flags.append("-c")
     if parsed.tag: flags.append("--tag")
     return flags
+
 
 def parse_ss(args):
     parser = argparse.ArgumentParser(prog="ss", add_help=False)
@@ -346,11 +390,13 @@ def parse_ss(args):
     if parsed.l: flags.append("-l")
     return flags
 
+
 def parse_stat(args):
     parser = argparse.ArgumentParser(prog="stat", add_help=False)
     parser.add_argument("-c", dest="format", type=str)
     parsed, _ = parser.parse_known_args(args)
     return ["-c"] if parsed.format else []
+
 
 def parse_tar(args):
     parser = argparse.ArgumentParser(prog="tar", add_help=False)
@@ -367,15 +413,18 @@ def parse_tar(args):
     if parsed.directory: flags.append("-C")
     return flags
 
+
 def parse_wxhexeditor(args):
     # GUI tool, rarely invoked with CLI flags
     return []
+
 
 def parse_xxd(args):
     parser = argparse.ArgumentParser(prog="xxd", add_help=False)
     parser.add_argument("-r", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-r"] if parsed.r else []
+
 
 def parse_sha256sum(args):
     parser = argparse.ArgumentParser(prog="sha256sum", add_help=False)
@@ -387,12 +436,14 @@ def parse_sha256sum(args):
     if parsed.tag: flags.append("--tag")
     return flags
 
+
 def parse_7z(args):
     # 7z supports lots of flags, here's a simple baseline
     parser = argparse.ArgumentParser(prog="7z", add_help=False)
     parser.add_argument("mode", nargs="?", default=None)  # e.g. "x", "a", "t"
     parsed, _ = parser.parse_known_args(args)
     return [parsed.mode] if parsed.mode else []
+
 
 def parse_lsblk(args):
     parser = argparse.ArgumentParser(prog="lsblk", add_help=False)
@@ -404,11 +455,13 @@ def parse_lsblk(args):
     if parsed.columns: flags.append("-o")
     return flags
 
+
 def parse_fsstat(args):
     parser = argparse.ArgumentParser(prog="fsstat", add_help=False)
     parser.add_argument("-t", action="store_true")
     parsed, _ = parser.parse_known_args(args)
     return ["-t"] if parsed.t else []
+
 
 PARSERS = {
     "mount": parse_mount_extended,
@@ -463,4 +516,3 @@ PARSERS = {
     "lsblk": parse_lsblk,
     "fsstat": parse_fsstat,
 }
-

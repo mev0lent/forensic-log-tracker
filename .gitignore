@@ -181,3 +181,7 @@ logs/
 .idea
 
 .zencoder
+
+# Pipfile
+Pipfile
+Pipfile.lock
