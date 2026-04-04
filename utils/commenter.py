@@ -39,7 +39,6 @@ def write_comment(case: str, text: str) -> Path:
 
     comment_file.write_text("\n".join(content), encoding="utf-8")
 
-    # Sign the comment file if configured
     if config.get("gpg", {}).get("enabled", True):
         sign_file(comment_file)
 

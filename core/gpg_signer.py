@@ -1,6 +1,6 @@
-# core/gpg_signer.py
 import subprocess
 from pathlib import Path
+from utils.log import logger
 
 
 def sign_file(log_path: Path) -> bool:
@@ -10,8 +10,8 @@ def sign_file(log_path: Path) -> bool:
             ["gpg", "--batch", "--yes", "--output", str(sig_path), "--detach-sign", str(log_path)],
             check=True
         )
-        print(f"[+] Signed logfile: {sig_path.name}")
+        logger.info(f"Signed logfile: {sig_path.name}")
         return True
     except subprocess.CalledProcessError:
-        print("[!] GPG signature failed – is a key configured?")
+        logger.warning("GPG signature failed – is a key configured?")
         return False

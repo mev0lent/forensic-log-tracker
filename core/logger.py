@@ -1,4 +1,4 @@
-# core/logger.py
+import json
 from pathlib import Path
 from utils.log import logger
 
@@ -7,6 +7,7 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
               max_lines: int = 20, dry_run: bool = False, output_hash: str = "") -> Path:
     safe_time = timestamp.replace(":", "-").replace(".", "-")
     logfile = case_dir / f"{safe_time}_command.log"
+    meta_file = logfile.with_suffix(".meta.json")
 
     if dry_run:
         preview = "[!] DRY RUN: the command wasn't executed."
@@ -28,6 +29,15 @@ def write_log(case_dir: Path, cmd: str, output: str, explanation: str, timestamp
         f.write("\n```\n\n")
         f.write(f"### [+] Explanation:\n{explanation}\n\n")
         f.write(f"### [+] SHA256 Output Hash:\n`{output_hash}`\n")
-        logger.info(f"[+] Log written to: {logfile}")
 
+    meta = {
+        "command": cmd,
+        "timestamp": timestamp,
+        "dry_run": dry_run,
+        "output_hash": output_hash,
+        "case": case_dir.name,
+    }
+    meta_file.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+    logger.info(f"Log written to: {logfile}")
     return logfile

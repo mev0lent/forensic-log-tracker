@@ -1,4 +1,3 @@
-# utils/reporting.py
 from pathlib import Path
 import subprocess
 import re
@@ -7,36 +6,32 @@ from core.hasher import compute_hash
 from utils.log import logger
 from utils.shared_config import load_config
 from utils.pathing import get_case_log_path, get_log_dir
+
 config = load_config()
 
-# Print available logs and GPG signatures for a case
+
 def analyze_case(case):
     case_dir = get_case_log_path(case)
     if not case_dir.exists():
-        logger.error(f"[x] Case {case} does not exist")
+        logger.error(f"Case {case} does not exist")
         return
 
     log_files = list(case_dir.glob("*.log"))
     sig_files = list(case_dir.glob("*.log.sig"))
 
-    print(f"\n[+] Analysis of case: {case}")
-    print(f"[+] {len(log_files)} logfile(s) found:")
+    logger.info(f"Analysis of case: {case} — {len(log_files)} logfile(s) found")
     for f in log_files:
-        print(f" - {f.name}")
+        logger.info(f"  - {f.name}")
 
     if sig_files:
-        print(f"\n[+] Signatures exist for:")
+        logger.info("Signatures found:")
         for f in sig_files:
-            print(f" - {f.name}")
+            logger.info(f"  - {f.name}")
     else:
-        logger.error(f"[x] No signatures found.")
+        logger.warning("No signatures found.")
 
-# Extract output block from log content
+
 def extract_block(lines, label="Output excerpt"):
-    """
-    Extracts a code block following a specific label.
-    Supports slight variations like 'Output Preview', spacing, or casing.
-    """
     label_variants = [
         label,
         "Output excerpt",
@@ -45,19 +40,16 @@ def extract_block(lines, label="Output excerpt"):
     ]
 
     try:
-        # Find the line index containing one of the label variants
         start = next(
             i for i, l in enumerate(lines)
             if any(variant.lower() in l.lower() for variant in label_variants)
         )
 
-        # Find first triple backtick line after label
         start_block = next(
             i for i in range(start, len(lines))
             if lines[i].strip().startswith("```")
         )
 
-        # Find matching closing backtick block
         end_block = next(
             i for i in range(start_block + 1, len(lines))
             if lines[i].strip().startswith("```")
@@ -67,19 +59,17 @@ def extract_block(lines, label="Output excerpt"):
     except StopIteration:
         return "[!] Output not found."
 
-# Extract legal explanation section
+
 def extract_explanation(lines):
     header_patterns = [
         "### [+] Erklärung",
         "### [+] Legal Context",
     ]
     try:
-        # Try all known headers until one matches
         start = next(
             i for i, l in enumerate(lines)
             if any(header.lower() in l.lower() for header in header_patterns)
         )
-        # Search for next section (starts with any heading)
         end = next(
             (i for i in range(start + 1, len(lines)) if lines[i].startswith("###")),
             len(lines)
@@ -88,17 +78,17 @@ def extract_explanation(lines):
     except StopIteration:
         return "[!] Explanation not found."
 
-# Build a complete Markdown report for a forensic case
+
 def generate_report(case, verify=True):
     logger.info(f"Generating report for case: {case}")
 
     case_dir = get_case_log_path(case)
     if not case_dir.exists():
-        logger.error(f"[x] Case {case} does not exist")
+        logger.error(f"Case {case} does not exist")
         return
 
     description_file = case_dir / "description.txt"
-    description = "*No Explanation found.*"
+    description = "*No description found.*"
     if description_file.exists():
         desc_lines = description_file.read_text().splitlines()
         description = next((l for l in desc_lines if "Description:" in l), "").replace("Description:", "").strip()
@@ -119,41 +109,44 @@ def generate_report(case, verify=True):
         log_text = log_file.read_text()
         lines = log_text.splitlines()
 
+        meta_file = log_file.with_suffix(".meta.json")
+
         if log_file.name.endswith("_command.log"):
-            # -- Process command logs --
             cmd = "*Unknown*"
             sha = "*Not found*"
 
-            for i, line in enumerate(lines):
-                if "Command" in line:
-                    # Try to extract command from up to the next 3 lines after the header
-                    for offset in range(1, 4):
-                        if i + offset < len(lines):
-                            content_line = lines[i + offset].strip()
-                            if "`" in content_line:
+            if meta_file.exists():
+                import json
+                meta = json.loads(meta_file.read_text(encoding="utf-8"))
+                cmd = meta.get("command", cmd)
+                sha = meta.get("output_hash", sha)
+            else:
+                for i, line in enumerate(lines):
+                    if "Command" in line:
+                        for offset in range(1, 4):
+                            if i + offset < len(lines):
+                                content_line = lines[i + offset].strip()
+                                if "`" in content_line:
+                                    matches = re.findall(r"`(.*?)`", content_line)
+                                    if matches:
+                                        cmd = matches[0]
+                                        break
+                                elif content_line:
+                                    cmd = content_line
+                                    break
+                        if cmd == "*Unknown*":
+                            logger.warning(f"No valid command found after 'Command:' in {log_file.name} (line {i})")
+
+                    elif "### [+] SHA256 Output Hash:" in line:
+                        for offset in range(1, 4):
+                            if i + offset < len(lines):
+                                content_line = lines[i + offset].strip()
                                 matches = re.findall(r"`(.*?)`", content_line)
                                 if matches:
-                                    cmd = matches[0]
+                                    sha = matches[0]
                                     break
-                            elif content_line:  # Fallback: take plain line if not empty
-                                cmd = content_line
-                                break
-                    if cmd == "*Unknown*":
-                        logger.warning(
-                            f"[report] No valid command found after 'Command:' in {log_file.name} (line {i})")
-
-                elif "### [+] SHA256 Output Hash:" in line:
-                    # Try to extract hash from up to the next 3 lines after the hash header
-                    for offset in range(1, 4):
-                        if i + offset < len(lines):
-                            content_line = lines[i + offset].strip()
-                            matches = re.findall(r"`(.*?)`", content_line)
-                            if matches:
-                                sha = matches[0]
-                                break
-                    if sha == "*Not found*":
-                        logger.warning(
-                            f"[report] No SHA256 hash found after 'SHA256 Output Hash' in {log_file.name} (line {i})")
+                        if sha == "*Not found*":
+                            logger.warning(f"No SHA256 hash found after 'SHA256 Output Hash' in {log_file.name} (line {i})")
 
             output_lines = extract_block(lines, "### [+] Output")
             output_excerpt = output_lines if isinstance(output_lines, str) else "\n".join(output_lines)
@@ -174,7 +167,7 @@ def generate_report(case, verify=True):
             report_lines.append(f"- Timestamp: `{timestamp}`")
             report_lines.append(f"- GPG-signature: {sig_status}")
             report_lines.append(f"- SHA256: `{sha}`\n")
-            report_lines.append(f"#### Output:\n```Shell\n{output_excerpt}\n```\n")
+            report_lines.append(f"#### Output:\n```shell\n{output_excerpt}\n```\n")
 
             if "[DRY RUN]" in output_excerpt:
                 report_lines.append("[!] This command was logged in dry-run mode and NOT executed.\n")
@@ -183,7 +176,6 @@ def generate_report(case, verify=True):
             report_lines.append("---\n")
 
         elif log_file.name.endswith("_comment.log"):
-            # -- Process comment logs --
             report_lines.append(f"### [+] Timestamp: `{timestamp}`")
             report_lines.append(log_text)
             report_lines.append("---\n")
@@ -197,14 +189,13 @@ def generate_report(case, verify=True):
     logger.info(f"Report written to: {report_path}")
 
 
-# Check SHA256 hashes of outputs for all logs in a case
 def verify_output(case):
     case_dir = get_case_log_path(case)
     if not case_dir.exists():
-        logger.error(f"[x] Case {case} does not exist")
+        logger.error(f"Case {case} does not exist")
         return
 
-    print(f"[+] Verifying output integrity for case: {case}")
+    logger.info(f"Verifying output integrity for case: {case}")
     for log_file in sorted(case_dir.glob("*.log")):
         lines = log_file.read_text().splitlines()
         expected_hash = None
@@ -219,27 +210,25 @@ def verify_output(case):
         cleaned = "\n".join([line.rstrip() for line in output_lines]).strip()
         hash_algo = config.get("output", {}).get("hash_algorithm", "sha256")
         actual_hash = compute_hash(cleaned, algorithm=hash_algo)
-        print(f"[HASH] Expected: {expected_hash}")
-        print(f"[HASH] Received: {actual_hash}")
         result = "[+] OK" if actual_hash == expected_hash else "[x] Mismatch"
-        print(f"{log_file.name}: {result}")
+        logger.info(f"{log_file.name}: {result} — expected={expected_hash} actual={actual_hash}")
 
-# Print a list of all case folders
+
 def list_case_folders():
     cases = [d.name for d in get_log_dir().iterdir() if d.is_dir()]
     if not cases:
-        logger.error(f"[x] No cases found.")
+        logger.warning("No cases found.")
     else:
-        print("[+] Existing cases:")
+        logger.info("Existing cases:")
         for c in cases:
-            print(f" - {c}")
+            logger.info(f"  - {c}")
 
-# Show case description file content
+
 def show_case_description(case: str):
     desc_file = get_case_log_path(case) / "description.txt"
     if not desc_file.exists():
-        print("[!] No case description found.")
+        logger.warning("No case description found.")
         return
 
     content = desc_file.read_text()
-    print(f"[+] Description of case {case}:\n\n{content}")
+    logger.info(f"Description of case {case}:\n\n{content}")

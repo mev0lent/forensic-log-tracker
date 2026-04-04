@@ -37,7 +37,7 @@ def get_legal_explanation(tool: str) -> str:
 
     cmd_entry = explanations.get(command, None)
     if not cmd_entry:
-        print(f"[x] No explanation for '{command}' found – please extend explanations.yaml.")
+        logger.warning(f"No explanation for '{command}' found – please extend explanations.yaml.")
         explanation_text = "[x] No specific explanation found."
     else:
         if isinstance(cmd_entry, str):

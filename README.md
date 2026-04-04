@@ -1,140 +1,115 @@
 # Forensic Log Tracker
 
-> A modular, secure CLI tool for forensic professionals and students.  
-> Designed to log, document, and digitally sign command outputs during digital forensic investigations.
+A modular CLI tool for digital forensic professionals and students. Designed to execute, document, and cryptographically sign forensic commands during investigations — producing structured, auditable evidence records.
 
 ---
 
-## What is this?
+## What it does
 
-**Forensic Log Tracker** is a Python-based command logging system for **Kali Linux** (or any Linux distro), enabling forensic analysts to:
+When you run a command through `flt`, it:
 
-- ✅ Execute shell commands and automatically log the results
-- ✅ Generate legal explanations per command (in **German**, for legal accuracy)
-- ✅ Digitally sign logs using **GPG** for integrity and authenticity
-- ✅ Structure evidence cleanly by **case**
-- ✅ Generate full **Markdown reports** per case
-- ✅ Verify outputs with cryptographic hashes (SHA256)
+- Executes the command via the system shell (bash or PowerShell)
+- Logs the output, truncated to a configurable preview
+- Attaches a formal legal explanation for the command (German, from `explanations.yaml`)
+- Hashes the output with SHA256 for integrity verification
+- Optionally signs the log file with your GPG key
+- Organizes everything under a named case folder
+
+All evidence is written as plain Markdown `.log` files alongside a `.meta.json` sidecar. Reports are generated as a single `case_report.md` per case.
 
 ---
 
-## ️ Setup
+## Requirements
 
-### Requirements
-
-- Linux (tested on Kali) or Windows
 - Python 3.9+
 - GPG (GNU Privacy Guard)
+- Linux (tested on Kali) or Windows
 
-### Installation
+---
 
-#### Linux
+## Installation
+
+### Linux
 
 ```bash
-# Clone the repository
 git clone https://github.com/mev0lent/forensic-log-tracker.git
 cd forensic-log-tracker
-
-#adjust permissions
 chmod +x setup.sh
-
-# Run the setup script
-
 ./setup.sh
+source ~/.bashrc   # or ~/.zshrc
+```
 
-# Source your shell configuration to load the alias
-source ~/.bashrc  # or ~/.zshrc if using zsh
+The setup script:
+- Creates a virtual environment at `forensic-log-venv/`
+- Installs all dependencies from `pyproject.toml`
+- Registers the `flt` alias in your shell profile
+- Prompts you to generate a GPG key if none exists
 
-# Activate the virtual environment
+After setup, activate the environment before use:
+
+```bash
 source forensic-log-venv/bin/activate
 ```
 
-#### Windows
+### Windows
 
 ```powershell
-# Clone the repository
 git clone https://github.com/mev0lent/forensic-log-tracker.git
 cd forensic-log-tracker
-
-# Run the setup script (you may need to set execution policy)
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\setup.ps1
-
-# Restart PowerShell or reload your profile
 . $PROFILE
-
-# Activate the virtual environment
 .\forensic-log-venv\Scripts\Activate.ps1
 ```
 
-
-🧠 **What this does for you:**
-- Creates a local Python virtual environment in `forensic-log-venv/`
-- Installs all dependencies listed in `pyproject.toml`
-- Sets up a shell alias `flt` to run the tool from anywhere
-- Optionally helps you generate a GPG key
-- Leaves your system environment untouched
-
-### 📦 Alternative setup: `requirements.txt` still available
-
-While we recommend using the `pyproject.toml`-based approach for reproducibility and clean isolation, we’ve left a `requirements.txt` in the repo for convenience.  
-If you prefer the traditional method:
+### Alternative (requirements.txt)
 
 ```bash
 python3 -m venv alt-env
 source alt-env/bin/activate
 pip install -r requirements.txt
-python cli.py --help
 ```
 
 ---
 
 ## Configuration
 
-### `config/config.yaml`
-
-Customize the following values:
+Edit `config/config.yaml` before first use:
 
 ```yaml
 project:
-  analyst: "Max Mustermann"
-  timezone: "UTC"
-
-execution:
-  default_output_lines: 20
-  dry_run_label: "[!] DRY RUN: Command not executed."
+  analyst: "Your Name"
+  timezone: "Europe/Berlin"   # Any IANA timezone string
 
 output:
-  language: "de"              # "en", "de" – for future translation of explanations
-  format: "md"                # "md", "html", "pdf" - NOT WORKING YET
-  preview_lines: 20
-  include_sha256: true
+  preview_lines: 20           # Lines shown in log preview
   hash_algorithm: "sha256"
+  comment_type: "Comment"     # "Comment" or "Callout" (Obsidian-style)
 
 gpg:
   enabled: true
   auto_verify: true
-  default_key: ""             # optional: GPG fingerprint
+  default_key: ""             # Optional: GPG key fingerprint
 
 logging:
   level: INFO                 # DEBUG, INFO, WARNING, ERROR, CRITICAL
 ```
 
-### `config/explanations.yaml`
-
-This file maps commands (and their flags) to **formal explanations**.
-
-> Explanations are written in formal terms. You can expand this YAML to include more tools and options.
+To add or extend tool explanations, edit `config/explanations.yaml`. Each entry maps a command (and optional flags) to a formal explanation used in log output and reports.
 
 ---
 
-## Basic CLI Usage
+## Usage
 
-### Create a case folder
+### Create a case
 
 ```bash
-flt new-case case001 --description "Investigating suspicious USB stick"
+flt new-case case001 --description "Investigating suspicious USB device"
 ```
+
+Creates `logs/case001/` and writes a `description.txt`.
+
+---
 
 ### Run a forensic command
 
@@ -142,36 +117,42 @@ flt new-case case001 --description "Investigating suspicious USB stick"
 flt run "strings /bin/ls" --case case001
 ```
 
-- Creates a `.log` and `.log.sig` file in `logs/case001/`
-- Output is limited to configured preview lines
-- Log includes legal explanation and SHA256
+Produces:
+- `logs/case001/<timestamp>_command.log` — Markdown log with output preview, explanation, and hash
+- `logs/case001/<timestamp>_command.meta.json` — structured metadata (command, hash, timestamp)
+- `logs/case001/<timestamp>_command.log.sig` — GPG detached signature (if enabled)
 
-#### Simulate a command without executing it (dry-run)
+---
+
+### Dry-run mode
 
 ```bash
 flt run "fdisk -l /dev/sdb" --case case001 --dry-run
 ```
-The command is not actually executed.
-A log file is still created with:
-- Timestamp
-- Command name
-explanation (if available)
 
-- The output section will contain:
+Logs the command with its explanation and timestamp but does not execute it. Useful for documenting intended actions before touching evidence.
 
-```bash
-[!] DRY RUN: Der Command wurde nicht wirklich ausgeführt.
-```
+---
 
-Useful for documenting intended actions without modifying data or evidence
-
-### Analyze logs for a case
+### Add a comment
 
 ```bash
-flt analyze --case case001
+flt comment --case case001 --text "Drive was write-protected before imaging."
 ```
 
-### View case info
+Creates a `_comment.log` file with the analyst name and timestamp. Signed with GPG if enabled.
+
+---
+
+### List all cases
+
+```bash
+flt list-cases
+```
+
+---
+
+### View case description
 
 ```bash
 flt case-info --case case001
@@ -179,21 +160,32 @@ flt case-info --case case001
 
 ---
 
-### Generate a full report
+### Analyze a case
+
+```bash
+flt analyze --case case001
+```
+
+Lists all log files and signatures present in the case folder.
+
+---
+
+### Generate a report
 
 ```bash
 flt report --case case001
 ```
 
-Creates:  
-`logs/case001/case001_report.md`
+Writes `logs/case001/case001_report.md` containing:
+- Case description
+- Chronological timeline of all commands and comments
+- Output excerpts, SHA256 hashes, legal context, and GPG signature status per entry
 
-Includes:
-- All commands
-- Output excerpts
-- SHA256 hash of each output
-- Legal explanation
-- GPG signature status
+To skip GPG verification during report generation:
+
+```bash
+flt report --case case001 --no-verify
+```
 
 ---
 
@@ -203,71 +195,73 @@ Includes:
 flt verify-output --case case001
 ```
 
-This checks whether the SHA256 hash stored in each log matches the actual output hash.
+Recomputes the SHA256 hash of each log's output block and compares it against the stored value. Reports OK or Mismatch per file.
 
 ---
 
-## About GPG Signing
-
-GPG ensures:
-- ✅ Logs are **authentic and unaltered**
-- ✅ Each `.log` file has a matching `.sig` signature
-- ✅ Signatures can be verified using:
+### Verify a signature manually
 
 ```bash
-gpg --verify path/to/repo/logs/case001/logfile.log.sig
+gpg --verify logs/case001/<logfile>.log.sig
 ```
 
 ---
-## Dockerized Testing
 
-### Build and Test
+## Testing
 
-#### For manual execution
+Tests run inside Docker to ensure a clean, isolated environment.
+
 ```bash
+# Build and run tests separately
 make build
 make test
-```
 
-### For immediate execution
-```bash
+# Build and run in one step
 make run_test
+
+# Remove leftover Docker images
+make clean
 ```
 
-### For cleaning/removing container
-```bash
-make clean
 ---
 
-## .gitignore tip
+## File structure
 
-Make sure your `.gitignore` includes:
+```
+forensic-log-tracker/
+├── core/               # Execution, logging, hashing, signing, legal explanations
+├── utils/              # Config loading, path resolution, reporting, comments
+├── config/
+│   ├── config.yaml     # Runtime configuration
+│   └── explanations.yaml  # Tool explanation database
+├── templates/          # Jinja2 template for legal explanation rendering
+├── forensic_log_tracker/
+│   └── cli.py          # CLI entry point
+├── test/               # pytest test suite
+├── setup.sh            # Linux setup script
+├── setup.ps1           # Windows setup script
+└── Makefile            # Docker test targets
+```
+
+Logs are written to `logs/<case-id>/` and are excluded from version control by default.
+
+---
+
+## .gitignore
+
+Make sure your `.gitignore` includes the following to avoid committing evidence or keys:
 
 ```
 logs/
 *.sig
 *.log
-.env/
+*.meta.json
+forensic-log-venv/
 __pycache__/
-log-tracker-env/
-pipfile
 ```
-
-To protect private evidence logs and signatures.
 
 ---
 
 ## License
 
-MIT – free to use, extend, and improve.
-
----
-
-## Contributing
-
-You can help by:
-- Adding more legal explanations
-- Improving export/report styles
-- Converting to HTML/PDF
-- Adding GUI or web layer
-
+MIT — free to use, modify, and extend.

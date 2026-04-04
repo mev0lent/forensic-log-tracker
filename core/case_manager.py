@@ -1,5 +1,5 @@
-# core/case_manager.py
 from utils.pathing import get_case_log_path
+from utils.log import logger
 
 def create_case_folder(case: str, description: str):
     base_path = get_case_log_path(case, create=True)
@@ -8,4 +8,4 @@ def create_case_folder(case: str, description: str):
 
     with desc_file.open("w", encoding="utf-8") as f:
         f.write(f"Case-ID: {case}\nDescription: {description}\n")
-    print(f" [+] New case created: {base_path}")
+    logger.info(f"New case created: {base_path}")
