@@ -1,0 +1,23 @@
+project:
+  analyst: "Max Mustermann"
+  timezone: "UTC"
+
+execution:
+  default_output_lines: 20
+  dry_run_label: "[!] DRY RUN: Command not executed."
+
+output:
+  language: "de"              # "en", "de" – for future translation of explanations
+  format: "md"                # "md", "html", "pdf" - NOT WORKING YET
+  preview_lines: 20
+  include_sha256: true
+  hash_algorithm: "sha256"
+  comment_type: "Comment"               # "Callout" oder "Comment"
+
+gpg:
+  enabled: true
+  auto_verify: true
+  default_key: ""             # optional: GPG fingerprint
+
+logging:
+  level: INFO                 # DEBUG, INFO, WARNING, ERROR, CRITICAL

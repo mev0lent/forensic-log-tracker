@@ -1,27 +1,59 @@
 # utils/pathing.py
 
+import shutil
+import importlib.resources
 from pathlib import Path
-from functools import lru_cache
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+_USER_CONFIG_DIR = Path.home() / ".config" / "forensic-log-tracker"
 
-@lru_cache()
-def get_config_path(filename="config.yaml"):
-    return BASE_DIR / "config" / filename
+_BUNDLED = [
+    ("config/config.yaml",       "config.yaml"),
+    ("config/explanations.yaml", "explanations.yaml"),
+    ("templates/legal.md.j2",    "templates/legal.md.j2"),
+]
 
-@lru_cache()
-def get_template_path(filename="legal.md.j2"):
-    return BASE_DIR / "templates" / filename
+_bootstrapped = False
 
-@lru_cache()
-def get_log_dir():
-    path = BASE_DIR / "logs"
-    try:
-        path.mkdir(exist_ok=True)
-    except OSError as e:
-        # Handle the error, e.g., log it or raise a custom exception
-        print(f"Error creating directory: {e}")
+
+def _bootstrap():
+    global _bootstrapped
+    if _bootstrapped:
+        return
+
+    _USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    (_USER_CONFIG_DIR / "templates").mkdir(exist_ok=True)
+
+    pkg = importlib.resources.files("forensic_log_tracker")
+    initialized = []
+
+    for bundled_rel, user_rel in _BUNDLED:
+        dest = _USER_CONFIG_DIR / user_rel
+        if not dest.exists():
+            shutil.copy2(str(pkg.joinpath(bundled_rel)), dest)
+            initialized.append(user_rel)
+
+    if initialized:
+        print(f"\n[+] flt: config initialized at {_USER_CONFIG_DIR}")
+        print(f"    Edit config.yaml to set your analyst name and preferences.\n")
+
+    _bootstrapped = True
+
+
+def get_config_path(filename="config.yaml") -> Path:
+    _bootstrap()
+    return _USER_CONFIG_DIR / filename
+
+
+def get_template_path(filename="legal.md.j2") -> Path:
+    _bootstrap()
+    return _USER_CONFIG_DIR / "templates" / filename
+
+
+def get_log_dir() -> Path:
+    path = Path.cwd() / "logs"
+    path.mkdir(exist_ok=True)
     return path
+
 
 def get_case_log_path(case_id: str, create: bool = False) -> Path:
     path = get_log_dir() / case_id
@@ -29,8 +61,8 @@ def get_case_log_path(case_id: str, create: bool = False) -> Path:
         path.mkdir(parents=True, exist_ok=True)
     return path
 
-@lru_cache()
+
 def get_output_path() -> Path:
-    path = BASE_DIR / "output"
+    path = Path.cwd() / "output"
     path.mkdir(exist_ok=True)
     return path
