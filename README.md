@@ -28,53 +28,15 @@ All evidence is written as plain Markdown `.log` files alongside a `.meta.json` 
 ---
 
 ## Installation
-
-### Linux
-
-```bash
-git clone https://github.com/mev0lent/forensic-log-tracker.git
-cd forensic-log-tracker
-chmod +x setup.sh
-./setup.sh
-source ~/.bashrc   # or ~/.zshrc
 ```
-
-The setup script:
-- Creates a virtual environment at `forensic-log-venv/`
-- Installs all dependencies from `pyproject.toml`
-- Registers the `flt` alias in your shell profile
-- Prompts you to generate a GPG key if none exists
-
-After setup, activate the environment before use:
-
-```bash
-source forensic-log-venv/bin/activate
-```
-
-### Windows
-
-```powershell
-git clone https://github.com/mev0lent/forensic-log-tracker.git
-cd forensic-log-tracker
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\setup.ps1
-. $PROFILE
-.\forensic-log-venv\Scripts\Activate.ps1
-```
-
-### Alternative (requirements.txt)
-
-```bash
-python3 -m venv alt-env
-source alt-env/bin/activate
-pip install -r requirements.txt
+pip install forensic-log-tracker
 ```
 
 ---
 
 ## Configuration
 
-Edit `config/config.yaml` before first use:
+Edit `~/.config/forensic-log-tracker/config.yaml` before first use:
 
 ```yaml
 project:
