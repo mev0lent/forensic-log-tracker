@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "forensic-log-tracker"
-version = "1.0.0"
+version = "1.0.1"
 description = "CLI tool for documenting, hashing, and signing forensic investigations"
 readme = "README.md"
 license = "MIT"

@@ -1,3 +1,4 @@
+import subprocess
 import typer
 from utils.log import logger
 from core.executor import execute_command
@@ -6,7 +7,7 @@ from core.gpg_signer import sign_file
 from utils.reporting import generate_report, analyze_case, list_case_folders, show_case_description
 from utils.commenter import write_comment
 from utils.shared_config import load_config
-from utils.pathing import get_case_log_path
+from utils.pathing import get_case_log_path, get_config_path
 
 app = typer.Typer()
 
@@ -114,6 +115,41 @@ def comment(
         typer.echo(f"[+] Comment added and signed: {comment_path}")
     except Exception as e:
         typer.echo(f"[!] Failed to add comment: {e}")
+
+
+@app.command()
+def setup():
+    """
+    Initial setup: verify GPG key and show config location.
+    Run this after installing flt for the first time.
+    """
+    config_path = get_config_path()
+    typer.echo(f"[+] Config: {config_path}")
+
+    # Check for existing GPG secret key
+    result = subprocess.run(
+        ["gpg", "--list-secret-keys", "--with-colons"],
+        capture_output=True, text=True
+    )
+    has_key = any(line.startswith("sec") for line in result.stdout.splitlines())
+
+    if has_key:
+        typer.echo("[+] GPG key found — signing is ready.")
+    else:
+        typer.echo("[!] No GPG secret key found.")
+        typer.echo("    flt signs log files with GPG to ensure chain-of-custody integrity.")
+        typer.echo("    You can create a key now, or skip and disable signing in config.yaml (gpg.enabled: false).")
+        typer.echo("")
+        create = typer.confirm("[?] Generate a new GPG key now?", default=True)
+        if create:
+            typer.echo("[+] Launching GPG key generation...")
+            subprocess.run(["gpg", "--full-generate-key"])
+        else:
+            typer.echo("[!] Skipped. Run 'gpg --full-generate-key' later, or set gpg.enabled: false in config.yaml.")
+
+    typer.echo("")
+    typer.echo(f"[+] Edit your config at: {config_path}")
+    typer.echo("    Set 'analyst' to your name before starting investigations.")
 
 
 def main():

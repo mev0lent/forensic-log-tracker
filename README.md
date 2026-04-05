@@ -8,9 +8,9 @@ A modular CLI tool for digital forensic professionals and students. Designed to 
 
 When you run a command through `flt`, it:
 
-- Executes the command via the system shell (bash or PowerShell)
+- Executes the command via the system shell
 - Logs the output, truncated to a configurable preview
-- Attaches a formal legal explanation for the command (German, from `explanations.yaml`)
+- Attaches a formal legal explanation for the command (from `explanations.yaml`)
 - Hashes the output with SHA256 for integrity verification
 - Optionally signs the log file with your GPG key
 - Organizes everything under a named case folder
@@ -22,21 +22,29 @@ All evidence is written as plain Markdown `.log` files alongside a `.meta.json` 
 ## Requirements
 
 - Python 3.9+
-- GPG (GNU Privacy Guard)
-- Linux (tested on Kali) or Windows
+- GPG (GNU Privacy Guard) — [Gpg4win](https://gpg4win.org) on Windows
 
 ---
 
 ## Installation
-```
+
+```bash
 pip install forensic-log-tracker
 ```
+
+Then run the setup wizard once:
+
+```bash
+flt setup
+```
+
+This checks for a GPG key, guides you through creating one if needed, and shows you where your config file lives.
 
 ---
 
 ## Configuration
 
-Edit `~/.config/forensic-log-tracker/config.yaml` before first use:
+Your config is stored at `~/.config/forensic-log-tracker/config.yaml`. Edit it before starting investigations:
 
 ```yaml
 project:
@@ -57,7 +65,7 @@ logging:
   level: INFO                 # DEBUG, INFO, WARNING, ERROR, CRITICAL
 ```
 
-To add or extend tool explanations, edit `config/explanations.yaml`. Each entry maps a command (and optional flags) to a formal explanation used in log output and reports.
+To add or extend tool explanations, edit `~/.config/forensic-log-tracker/explanations.yaml`. Each entry maps a command (and optional flags) to a formal explanation used in log output and reports.
 
 ---
 
@@ -69,7 +77,7 @@ To add or extend tool explanations, edit `config/explanations.yaml`. Each entry 
 flt new-case case001 --description "Investigating suspicious USB device"
 ```
 
-Creates `logs/case001/` and writes a `description.txt`.
+Creates `logs/case001/` in your current directory and writes a `description.txt`.
 
 ---
 
@@ -169,57 +177,33 @@ gpg --verify logs/case001/<logfile>.log.sig
 
 ---
 
-## Testing
-
-Tests run inside Docker to ensure a clean, isolated environment.
-
-```bash
-# Build and run tests separately
-make build
-make test
-
-# Build and run in one step
-make run_test
-
-# Remove leftover Docker images
-make clean
-```
-
----
-
 ## File structure
 
 ```
-forensic-log-tracker/
-├── core/               # Execution, logging, hashing, signing, legal explanations
-├── utils/              # Config loading, path resolution, reporting, comments
-├── config/
-│   ├── config.yaml     # Runtime configuration
-│   └── explanations.yaml  # Tool explanation database
-├── templates/          # Jinja2 template for legal explanation rendering
-├── forensic_log_tracker/
-│   └── cli.py          # CLI entry point
-├── test/               # pytest test suite
-├── setup.sh            # Linux setup script
-├── setup.ps1           # Windows setup script
-└── Makefile            # Docker test targets
-```
+~/.config/forensic-log-tracker/
+├── config.yaml          # Runtime configuration (edit this)
+├── explanations.yaml    # Tool explanation database (extend this)
+└── templates/
+    └── legal.md.j2      # Jinja2 template for legal explanation rendering
 
-Logs are written to `logs/<case-id>/` and are excluded from version control by default.
+<your working directory>/
+├── logs/
+│   └── <case-id>/       # All case logs, metadata, signatures, and reports
+└── output/              # Generated report output
+```
 
 ---
 
 ## .gitignore
 
-Make sure your `.gitignore` includes the following to avoid committing evidence or keys:
+If you are working inside a git repository, make sure your `.gitignore` includes:
 
 ```
 logs/
+output/
 *.sig
 *.log
 *.meta.json
-forensic-log-venv/
-__pycache__/
 ```
 
 ---
